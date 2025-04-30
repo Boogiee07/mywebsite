@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pansol Paradise Resort - Hot Spring Haven</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background-color: #0066cc;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .hero {
+      background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/api/placeholder/1200/500');
+      background-size: cover;
+      background-position: center;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .facilities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 2rem 0;
+    }
+    .facility-item {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      height: 250px;
+    }
+    .facility-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .facility-item:hover img {
+      transform: scale(1.05);
+    }
+    .facility-title {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      text-align: center;
+      margin: 0;
+    }
+    .about {
+      background-color: #e6f2ff;
+      padding: 3rem 0;
+    }
+    .contact {
+      background-color: #0066cc;
+      color: white;
+      padding: 3rem 0;
+      text-align: center;
+    }
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+    .map {
+      height: 400px;
+      margin: 2rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .gallery img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      .facilities-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .facilities-grid {
+        grid-template-columns: 1fr;
+      }
+      .gallery {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="#home">Home</a> |
+      <a href="#about">About</a> |
+      <a href="#facilities">Facilities</a> |
+      <a href="#gallery">Gallery</a> |
+      <a href="#location">Location</a> |
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <div class="hero" id="home">
+    <div>
+      <h1>Pansol Paradise Resort</h1>
+      <p>Experience the natural hot spring waters of Calamba, Laguna</p>
+    </div>
+  </div>
+
+  <div class="about" id="about">
+    <div class="container">
+      <h2>Welcome to Pansol Paradise</h2>
+      <p>Nestled at the foot of Mount Makiling, Pansol Paradise Resort offers a unique natural hot spring experience that has made Calamba famous. Our resort harnesses the therapeutic mineral-rich waters that naturally flow from the mountain, providing our guests a relaxing and rejuvenating escape from city life.</p>
+      <p>Established in 2005, our family-owned resort has been a favorite destination for both locals and tourists seeking the healing benefits of Pansol's hot springs. With lush gardens and scenic mountain views, we provide a tranquil setting for your day trips and gatherings.</p>
+    </div>
+  </div>
+
+  <div class="container" id="facilities">
+    <h2>Our Facilities</h2>
+    <div class="facilities-grid">
+      <div class="facility-item">
+        <img src="/api/placeholder/400/300" alt="Hot Spring Pool">
+        <h3 class="facility-title">Hot Spring Pools</h3>
+      </div>
+      <div class="facility-item">
+        <img src="/api/placeholder/400/300" alt="Pavilion">
+        <h3 class="facility-title">Open Pavilions</h3>
+      </div>
+      <div class="facility-item">
+        <img src="/api/placeholder/400/300" alt="Grilling Area">
+        <h3 class="facility-title">Grilling Stations</h3>
+      </div>
+      <div class="facility-item">
+        <img src="/api/placeholder/400/300" alt="Karaoke">
+        <h3 class="facility-title">Karaoke Facilities</h3>
+      </div>
+      <div class="facility-item">
+        <img src="/api/placeholder/400/300" alt="Playground">
+        <h3 class="facility-title">Children's Play Area</h3>
+      </div>
+      <div class="facility-item">
+        <img src="/api/placeholder/400/300" alt="Gardens">
+        <h3 class="facility-title">Garden Areas</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="gallery">
+    <h2>Gallery</h2>
+    <div class="gallery">
+      <img src="/api/placeholder/400/300" alt="Resort View 1">
+      <img src="/api/placeholder/400/300" alt="Resort View 2">
+      <img src="/api/placeholder/400/300" alt="Resort View 3">
+      <img src="/api/placeholder/400/300" alt="Resort View 4">
+      <img src="/api/placeholder/400/300" alt="Resort View 5">
+      <img src="/api/placeholder/400/300" alt="Resort View 6">
+    </div>
+  </div>
+
+  <div class="container" id="location">
+    <h2>Location</h2>
+    <p>Located in Barangay Pansol, Calamba City, Laguna. We are approximately 2 hours away from Manila via SLEX.</p>
+    <div class="map">
+      <img src="/api/placeholder/1200/400" alt="Map Location">
+    </div>
+    <h3>Directions:</h3>
+    <p>From Manila, take SLEX and exit at Calamba. Follow the main road towards Pansol and look for our signage on the right side of the road, approximately 3 kilometers from the exit.</p>
+  </div>
+
+  <div class="contact" id="contact">
+    <div class="container">
+      <h2>Contact Information</h2>
+      <p>For inquiries about our resort, please contact us through:</p>
+      <p>Phone: (049) 123-4567</p>
+      <p>Mobile: 0917-123-4567</p>
+      <p>Email: info@pansolparadise.com</p>
+      <p>Operating Hours: 8:00 AM - 10:00 PM, daily</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Pansol Paradise Resort. All Rights Reserved.</p>
+    <p>Pansol, Calamba City, Laguna, Philippines</p>
+  </footer>
+</body>
+</html>
