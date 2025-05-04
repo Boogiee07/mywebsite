@@ -1,743 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pansol Area Map</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.css" />
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-        }
-        .popup .popuptext {
-            visibility: hidden;
-            width: 160px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 8px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -80px;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        .header {
-            background-color: #4285F4;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .search-container {
-            display: flex;
-            flex: 1;
-            max-width: 600px;
-            margin: 0 20px;
-        }
-        .search-box {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px 0 0 4px;
-            font-size: 16px;
-        }
-        .search-button {
-            background-color: #f8f8f8;
-            border: 1px solid #ccc;
-            border-left: none;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 0 4px 4px 0;
-        }
-        .map-container {
-            flex: 1;
-            width: 100%;
-            position: relative;
-        }
-        #map {
-            height: 100%;
-            width: 100%;
-        }
-        .sidebar {
-            width: 300px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            position: absolute;
-            top: 60px;
-            left: 10px;
-            z-index: 1000;
-            border-radius: 4px;
-            max-height: calc(100% - 80px);
-            overflow-y: auto;
-        }
-        .place-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-        .place-item:hover {
-            background-color: #f5f5f5;
-        }
-        .place-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .place-address {
-            color: #666;
-            font-size: 14px;
-        }
-        .location-button {
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            margin-top: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .location-button:hover {
-            background-color: #3367D6;
-        }
-        .popup-content {
-            margin-bottom: 6px;
-        }
-        .amenities {
-            font-size: 12px;
-            margin-top: 4px;
-            color: #444;
-        }
-        .ratings {
-            color: #FFA500;
-            font-weight: bold;
-            margin-top: 4px;
-        }
-        .price-range {
-            font-style: italic;
-            margin-top: 4px;
-            color: #008000;
-        }
-        .gps-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .gps-button {
-            background-color: white;
-            border: 2px solid rgba(0,0,0,0.2);
-            border-radius: 4px;
-            padding: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-        }
-        .gps-button:hover {
-            background-color: #f4f4f4;
-        }
-        .gps-icon {
-            width: 24px;
-            height: 24px;
-        }
-        .directions-button {
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            margin-top: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            width: 100%;
-        }
-        .directions-button:hover {
-            background-color: #3367D6;
-        }
-        #distance-time {
-            margin-top: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #4285F4;
-        }
-        .directions-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 10px;
-            z-index: 1000;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 4px;
-            width: 300px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 15px;
-            display: none;
-        }
-        .directions-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .directions-title {
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .close-directions {
-            cursor: pointer;
-            font-size: 20px;
-        }
-        .direction-step {
-            padding: 8px 0;
-            border-bottom: 1px solid #f5f5f5;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .step-icon {
-            min-width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #4285F4;
-            color: white;
-            border-radius: 50%;
-            font-size: 12px;
-        }
-        .step-instruction {
-            flex: 1;
-            font-size: 14px;
-        }
-        .step-distance {
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
-        }
-        .directions-summary {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-            color: #4285F4;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laguna Resorts Map</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+    
+    #map {
+      width: 100%;
+      height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+    
+    /* Sidebar styles */
+    .sidebar {
+      width: 320px;
+      background-color: #fff;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: absolute;
+      top: 0;
+      left: -320px;
+      height: 100%;
+      z-index: 1000;
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar.open {
+      left: 0;
+    }
+    
+    .sidebar-header {
+      padding: 20px 15px;
+      background-color: #3498db;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .sidebar-title {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    
+    .sidebar-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+    }
+    
+    .sidebar-content {
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    
+    
+    /* Control buttons */
+    .controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 900;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn {
+      background-color: white;
+      border: none;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      padding: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-2px);
+    }
+    
+    .btn-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      padding: 0 10px;
+    }
+    
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+  
+    .view-all-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #3498db;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 900;
+      border: none;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+    
+    .view-all-btn:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+    
+    /* Resort list items */
+    .place-item {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+    }
+    
+    .place-item:hover {
+      background-color: #f5f8fa;
+      padding-left: 20px;
+    }
+    
+    .place-icon {
+      margin-right: 15px;
+      width: 40px;
+      height: 40px;
+      background-color: #e7f4fd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3498db;
+      flex-shrink: 0;
+    }
+    
+    .place-info {
+      flex-grow: 1;
+    }
+    
+    .place-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    
+    .place-address {
+      font-size: 13px;
+      color: #6c757d;
+    }
+    
+    /* Resort info panel */
+    .resort-info {
+      position: absolute;
+      bottom: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      max-width: 500px;
+      width: 90%;
+      z-index: 950;
+      transition: bottom 0.3s ease;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .resort-info.visible {
+      bottom: 20px;
+    }
+    
+    .resort-info h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #2c3e50;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .resort-info p {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+    
+    .info-label {
+      font-weight: bold;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-bottom: 3px;
+    }
+    
+    .close-info {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      color: #7f8c8d;
+      transition: all 0.2s;
+    }
+    
+    .close-info:hover {
+      background-color: #e9ecef;
+      color: #2c3e50;
+    }
+    
+    /* Custom marker style */
+    .custom-marker {
+      width: 30px;
+      height: 30px;
+      transition: transform 0.3s ease;
+    }
+    
+    .custom-marker.highlight {
+      transform: scale(1.3);
+    }
+    
+    /* Animation for marker bounce */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .marker-bounce {
+      animation: bounce 0.8s ease infinite;
+    }
+    
+    /* Website button styles */
+    .website-btn {
+      display: inline-block;
+      background-color: #3498db;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-top: 10px;
+      font-weight: 500;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    
+    .website-btn:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 280px;
+        left: -280px;
+      }
+      
+      .resort-info {
+        width: 85%;
+        padding: 15px;
+      }
+      
+      .controls {
+        top: 15px;
+        left: 15px;
+      }
+      
+      .view-all-btn {
+        top: 15px;
+        right: 15px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .btn-text span {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">Pansol Maps</div>
-            <div class="search-container">
-                <input type="text" class="search-box" placeholder="Search in Pansol area...">
-                <button class="search-button">Search</button>
-            </div>
-        </div>
-        <div class="map-container">
-            <div id="map"></div>
-            <div class="gps-controls">
-                <button class="gps-button" id="locate-me" title="Show my location">
-                    <svg class="gps-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                </button>
-                <button class="gps-button" id="clear-route" title="Clear route" style="display: none;">
-                    <svg class="gps-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div id="directions-panel" class="directions-panel">
-                <div class="directions-header">
-                    <div class="directions-title">Directions</div>
-                    <div class="close-directions" onclick="closeDirections()">×</div>
-                </div>
-                <div id="directions-steps"></div>
-                <div class="directions-summary">
-                    <div>Total Distance: <span id="total-distance">0 km</span></div>
-                    <div>Est. Time: <span id="total-time">0 min</span></div>
-                </div>
-            </div>
-        </div>
-        <div class="sidebar">
-            <div class="place-item" onclick="panToLocation(14.179855690866304, 121.1837820447193)">
-                <div class="place-name">Laguna Hot Spring Resort</div>
-                <div class="place-address">Pansol, Calamba, Laguna</div>
-            </div>  
-            <div class="place-item" onclick="panToLocation(14.179350807676604, 121.18485773727306)">
-                <div class="place-name">Villa Mejia</div>
-                <div class="place-address">Pansol, Calamba, Laguna</div>
-            </div>
-            <div class="place-item" onclick="panToLocation(14.179889853295485, 121.1861350014737)">
-                <div class="place-name">Glennette's Haven Private Resort</div>
-                <div class="place-address">Pansol, Calamba, Laguna</div>
-            </div>
-            <div class="place-item" onclick="panToLocation(14.17950049393675, 121.18694386655233)">
-                <div class="place-name">Elysian Sourire Resort</div>
-                <div class="place-address">Pansol, Calamba, Laguna</div>
-            </div>
-            <div class="place-item" onclick="panToLocation(14.180012234621406, 121.1871543967939)">
-                <div class="place-name">Villa Francesca Private Resort - Pansol</div>
-                <div class="place-address">Pansol, Calamba, Laguna</div>
-            </div>
-        </div>
+  <div id="map"></div>
+  
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Laguna Resorts</h2>
+      <button class="sidebar-close" id="sidebar-close">&times;</button>
     </div>
-
-    <script>
-        // Initialize map centered on Pansol, Calamba, Laguna
-        const map = L.map('map').setView([14.17904173123533, 121.18577912412782], 16);
-        
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    <div class="sidebar-content">
+      <div class="place-item" onclick="panToResort('lagunaHotSpring')">
+        <div class="place-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div class="place-info">
+          <div class="place-name">Laguna Hot Spring Resort</div>
+          <div class="place-address">Pansol, Calamba, Laguna</div>
+        </div>
+      </div>
+      <div class="place-item" onclick="panToResort('villaMejia')">
+        <div class="place-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div class="place-info">
+          <div class="place-name">Villa Mejia</div>
+          <div class="place-address">Pansol, Calamba, Laguna</div>
+        </div>
+      </div>
+      <div class="place-item" onclick="panToResort('glennettesHaven')">
+         <div class="place-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div class="place-info">
+          <div class="place-name">Glennette's Haven Private Resort</div>
+          <div class="place-address">Pansol, Calamba, Laguna</div>
+        </div>
+      </div>
+      <div class="place-item" onclick="panToResort('elysianSourire')">
+        <div class="place-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div class="place-info">
+          <div class="place-name">Elysian Sourire Resort</div>
+          <div class="place-address">Pansol, Calamba, Laguna</div>
+        </div>
+      </div>
+      <div class="place-item" onclick="panToResort('villaFrancesca')">
+        <div class="place-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div class="place-info">
+          <div class="place-name">Villa Francesca Private Resort - Pansol</div>
+          <div class="place-address">Pansol, Calamba, Laguna</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button class="btn btn-icon" id="sidebar-toggle" title="Show Resort List">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    
+  </div>
+  
+  <button class="view-all-btn" id="view-all-btn">View All Resorts</button>
+  
+  <div class="resort-info" id="resort-info">
+    <span class="close-info" onclick="closeResortInfo()">&times;</span>
+    <h3 id="info-title"></h3>
+    <div class="info-label">Location</div>
+    <p id="info-address"></p>
+    <div class="info-label">About</div>
+    <p id="info-description"></p>
+    <div class="info-label">Facilities</div>
+    <p id="info-facilities"></p>
+    <div id="website-container">
+      <a href="#" id="info-website" class="website-btn" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px;">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        View Website
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Resort data
+    const resorts = {
+      lagunaHotSpring: {
+        name: "Laguna Hot Spring Resort",
+        address: "Pansol, Calamba, Laguna",
+        description: "A popular resort featuring natural hot spring pools and accommodations for families and groups.",
+        facilities: "Swimming pools, Hot spring baths, Cottages, Function halls, Restaurant, Parking",
+        lat: 14.179855690866304,
+        lng: 121.1837820447193,
+        website: "1_RESORT.html"
+      },
+      villaMejia: {
+        name: "Villa Mejia",
+        address: "Pansol, Calamba, Laguna",
+        description: "A private resort with swimming pools and complete facilities for events and gatherings.",
+        facilities: "Private pools, Event space, Kitchen facilities, Barbecue area, Air-conditioned rooms",
+        lat: 14.179350807676604,
+        lng: 121.18485773727306,
+        website: "2_RESORT.html"
+      },
+      glennettesHaven: {
+        name: "Glennette's Haven Private Resort",
+        address: "Pansol, Calamba, Laguna",
+        description: "An exclusive private resort with hot spring pools perfect for family outings and celebrations.",
+        facilities: "Hot spring pools, Karaoke, Videoke, Outdoor grilling area, WiFi",
+        lat: 14.179889853295485,
+        lng: 121.1861350014737,
+        website: "3_RESORT.html"
+      },
+      elysianSourire: {
+        name: "Elysian Sourire Resort",
+        address: "Pansol, Calamba, Laguna",
+        description: "A tranquil resort offering relaxing hot spring pools and modern amenities.",
+        facilities: "Heated pools, Spa services, Gazebo, Garden area, Outdoor dining",
+        lat: 14.17950049393675,
+        lng: 121.18694386655233,
+        website: "4_RESORT.html"
+      },
+      villaFrancesca: {
+        name: "Villa Francesca Private Resort - Pansol",
+        address: "Pansol, Calamba, Laguna",
+        description: "A spacious private resort ideal for large groups and events with multiple pools.",
+        facilities: "Multiple swimming pools, Function hall, Videoke, Cottages, Playground",
+        lat: 14.180012234621406,
+        lng: 121.1871543967939,
+        website: "5_RESORT.html"
+      }
+    };
+    
+    // Map initialization
+    let map;
+    let markers = {};
+    let activeMarker = null;
+    
+    // Initialize map using Leaflet
+    function initMap() {
+      // Create map centered on Laguna resorts area
+      map = L.map('map', {
+        zoomControl: false
+      }).setView([14.1799, 121.1855], 16);
+      
+      // Add custom zoom control in the right bottom corner
+      L.control.zoom({
+        position: 'bottomright'
+      }).addTo(map);
+      
+      // Add OpenStreetMap tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(map);
+      
+      // Custom marker icon
+      const customIcon = L.divIcon({
+        className: 'custom-marker',
+        html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
+          <path fill="#3498db" d="M12 0c-4.4 0-8 3.6-8 8 0 5.4 7 13.4 7.3 13.7.2.2.5.3.7.3s.5-.1.7-.3c.3-.3 7.3-8.3 7.3-13.7 0-4.4-3.6-8-8-8zm0 12c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
+        </svg>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 30]
+      });
+      
+      // Add markers for each resort
+      for (const [id, resort] of Object.entries(resorts)) {
+        const marker = L.marker([resort.lat, resort.lng], {
+          title: resort.name,
+          icon: customIcon
         }).addTo(map);
         
-        // Variables for GPS functionality
-        let userMarker = null;
-        let userPosition = null;
-        let routingControl = null;
-        let selectedDestination = null;
+        markers[id] = marker;
         
-        // Add markers for popular locations in Pansol with enhanced information
-        const locations = [
-            { 
-                name: "Laguna Hot Spring Resort", 
-                lat: 14.179855690866304, 
-                lng: 121.1837820447193,
-                info: "A popular hot spring resort with multiple pools and accommodations.",
-                buttonText: "View Details",
-                targetPage: "1_RESORT.html",
-                phone: "+63 915 123 4567",
-                rating: "4.5/5",
-                priceRange: "₱3,500 - ₱7,000 per night",
-                amenities: "Swimming pools, hot springs, restaurant, karaoke, WiFi",
-                capacity: "Up to 50 guests",
-                openHours: "24/7"
-            },
-            { 
-                name: "Villa Mejia", 
-                lat: 14.179350807676604, 
-                lng: 121.18485773727306,
-                info: "Private villa with hot spring pools for family gatherings and events.",
-                buttonText: "View Details",
-                targetPage: "2_RESORT.html",
-                phone: "+63 917 765 4321",
-                rating: "4.3/5",
-                priceRange: "₱5,000 - ₱8,000 per night",
-                amenities: "Private pool, hot spring, kitchen, BBQ area, air conditioning",
-                capacity: "Up to 25 guests",
-                openHours: "Check-in: 2PM, Check-out: 12NN"
-            },
-            { 
-                name: "Glennette's Haven Private Resort", 
-                lat: 14.179889853295485, 
-                lng: 121.1861350014737,
-                info: "Cozy private resort with natural hot spring water and event facilities.",
-                buttonText: "View Details",
-                targetPage: "3_RESORT.html",
-                phone: "+63 919 876 5432",
-                rating: "4.7/5",
-                priceRange: "₱7,000 - ₱12,000 per night",
-                amenities: "Hot spring pool, event hall, sound system, billiards, playground",
-                capacity: "Up to 40 guests",
-                openHours: "Check-in: 2PM, Check-out: 12NN"
-            },
-            { 
-                name: "Elysian Sourire Resort", 
-                lat: 14.17950049393675, 
-                lng: 121.18694386655233,
-                info: "Modern resort offering relaxing hot springs and comfortable accommodations.",
-                buttonText: "View Details",
-                targetPage: "4_RESORT.html",
-                phone: "+63 918 234 5678",
-                rating: "4.6/5",
-                priceRange: "₱6,500 - ₱15,000 per night",
-                amenities: "Jacuzzi, swimming pool, massage service, game room, function hall",
-                capacity: "Up to 60 guests",
-                openHours: "24/7 with prior reservation"
-            },
-            { 
-                name: "Villa Francesca Private Resort - Pansol", 
-                lat: 14.180012234621406, 
-                lng: 121.1871543967939,
-                info: "Exclusive private resort ideal for family reunions and corporate retreats.",
-                buttonText: "View Details",
-                targetPage: "5_RESORT.html",
-                phone: "+63 916 543 2109",
-                rating: "4.8/5",
-                priceRange: "₱10,000 - ₱18,000 per night",
-                amenities: "Multiple pools, outdoor kitchen, large garden, conference room, spa",
-                capacity: "Up to 80 guests",
-                openHours: "Check-in: 2PM, Check-out: 12NN"
-            }
-        ];
-        
-        // Create a marker collection to manage them
-        const markers = {};
-        
-        // Add markers to the map with interactive popups and buttons
-        locations.forEach(location => {
-            const marker = L.marker([location.lat, location.lng]).addTo(map);
-            
-            // Create popup content with button and enhanced information
-            const popupContent = document.createElement('div');
-            
-            // Add name
-            const nameElement = document.createElement('div');
-            nameElement.innerHTML = `<b>${location.name}</b>`;
-            nameElement.className = 'popup-content';
-            popupContent.appendChild(nameElement);
-            
-            // Add basic info
-            const infoElement = document.createElement('div');
-            infoElement.textContent = location.info;
-            infoElement.className = 'popup-content';
-            popupContent.appendChild(infoElement);
-            
-            // Add phone number
-            const phoneElement = document.createElement('div');
-            phoneElement.textContent = `📞 ${location.phone}`;
-            phoneElement.className = 'popup-content';
-            popupContent.appendChild(phoneElement);
-            
-            // Add ratings
-            const ratingElement = document.createElement('div');
-            ratingElement.textContent = `★ ${location.rating}`;
-            ratingElement.className = 'ratings popup-content';
-            popupContent.appendChild(ratingElement);
-            
-            // Add price range
-            const priceElement = document.createElement('div');
-            priceElement.textContent = `${location.priceRange}`;
-            priceElement.className = 'price-range popup-content';
-            popupContent.appendChild(priceElement);
-            
-            // Add amenities
-            const amenitiesElement = document.createElement('div');
-            amenitiesElement.textContent = `Amenities: ${location.amenities}`;
-            amenitiesElement.className = 'amenities popup-content';
-            popupContent.appendChild(amenitiesElement);
-            
-            // Add capacity
-            const capacityElement = document.createElement('div');
-            capacityElement.textContent = `Capacity: ${location.capacity}`;
-            capacityElement.className = 'popup-content';
-            popupContent.appendChild(capacityElement);
-            
-            // Add operating hours
-            const hoursElement = document.createElement('div');
-            hoursElement.textContent = `Hours: ${location.openHours}`;
-            hoursElement.className = 'popup-content';
-            popupContent.appendChild(hoursElement);
-            
-            // Add distance and time info element (will be populated when user location is available)
-            const distanceTimeElement = document.createElement('div');
-            distanceTimeElement.id = 'distance-time';
-            distanceTimeElement.style.display = 'none';
-            popupContent.appendChild(distanceTimeElement);
-            
-            // Add button that navigates to 123.html
-            const buttonLink = document.createElement('a');
-            buttonLink.textContent = location.buttonText;
-            buttonLink.className = 'location-button';
-            buttonLink.href = location.targetPage + '?resort=' + encodeURIComponent(location.name);
-            popupContent.appendChild(buttonLink);
-            
-            // Add directions button (only shown when user location is available)
-            const directionsButton = document.createElement('button');
-            directionsButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg> Get Directions';
-            directionsButton.className = 'directions-button';
-            directionsButton.style.display = 'none';
-            directionsButton.onclick = function(e) {
-                e.preventDefault();
-                if (userPosition) {
-                    getDirections(userPosition, [location.lat, location.lng], location.name);
-                    marker.closePopup();
-                } else {
-                    alert('Please enable your location first by clicking the location button.');
-                }
-            };
-            popupContent.appendChild(directionsButton);
-            
-            marker.bindPopup(popupContent, { maxWidth: 300 });
-            
-            // Add click event to show popup
-            marker.on('click', function() {
-                selectedDestination = {
-                    latlng: [location.lat, location.lng],
-                    name: location.name
-                };
-                this.openPopup();
-                
-                // Show the directions button if user location is available
-                if (userPosition) {
-                    popupContent.querySelector('.directions-button').style.display = 'flex';
-                }
-            });
-            
-            // Store marker for later reference
-            markers[location.name] = marker;
+        // Add click event for markers
+        marker.on('click', function() {
+          showResortInfo(id);
+          highlightMarker(id);
         });
+      }
+    }
+    
+    // Call initMap when the page loads
+    window.onload = function() {
+      initMap();
+      
+      // Add event listeners after the page loads
+      document.getElementById("sidebar-toggle").addEventListener("click", function() {
+        toggleSidebar();
+      });
+      
+      document.getElementById("sidebar-close").addEventListener("click", function() {
+        toggleSidebar(false);
+      });
+      
+      document.getElementById("view-all-btn").addEventListener("click", viewAllResorts);
+      
+      // Handle clicks outside sidebar to close it on mobile
+      document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
         
-        // Function to get user's current location
-        document.getElementById('locate-me').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        userPosition = [position.coords.latitude, position.coords.longitude];
-                        
-                        // If marker already exists, update position, otherwise create a new one
-                        if (userMarker) {
-                            userMarker.setLatLng(userPosition);
-                        } else {
-                            userMarker = L.marker(userPosition, {
-                                icon: L.divIcon({
-                                    className: 'user-location-marker',
-                                    html: `<div style="background-color:#4285F4; border-radius:50%; width:16px; height:16px; border:3px solid white;"></div>`,
-                                    iconSize: [22, 22],
-                                    iconAnchor: [11, 11]
-                                })
-                            }).addTo(map);
-                            userMarker.bindPopup("You are here").openPopup();
-                        }
-                        
-                        // Pan to user location
-                        map.panTo(userPosition);
-                        
-                        // Show directions button in any open popup
-                        const openPopup = document.querySelector('.leaflet-popup');
-                        if (openPopup) {
-                            const directionsBtn = openPopup.querySelector('.directions-button');
-                            if (directionsBtn) {
-                                directionsBtn.style.display = 'flex';
-                            }
-                        }
-                    },
-                    function(error) {
-                        alert(`Error getting your location: ${error.message}`);
-                    }
-                );
-            } else {
-                alert('Geolocation is not supported by your browser');
-            }
-        });
-        
-        // Function to format directions instructions nicely
-        function formatInstructions(instruction) {
-            // Remove HTML tags
-            let cleanInstruction = instruction.replace(/<(?:.|\n)*?>/gm, '');
-            
-            // Capitalize first letter
-            return cleanInstruction.charAt(0).toUpperCase() + cleanInstruction.slice(1);
+        if (window.innerWidth <= 768 && 
+            sidebar.classList.contains('open') && 
+            !sidebar.contains(event.target) && 
+            event.target !== sidebarToggle && 
+            !sidebarToggle.contains(event.target)) {
+          toggleSidebar(false);
         }
-        
-        // Function to close directions panel
-        function closeDirections() {
-            document.getElementById('directions-panel').style.display = 'none';
+      });
+    };
+    
+    // Toggle sidebar
+    function toggleSidebar(forceState) {
+      const sidebar = document.getElementById("sidebar");
+      
+      if (forceState !== undefined) {
+        if (forceState) {
+          sidebar.classList.add("open");
+        } else {
+          sidebar.classList.remove("open");
         }
-        
-        // Function to get directions from user location to resort
-        function getDirections(from, to, destinationName) {
-            // Clear existing route if any
-            if (routingControl) {
-                map.removeControl(routingControl);
-            }
-            
-            // Create new routing control
-            routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(from[0], from[1]),
-                    L.latLng(to[0], to[1])
-                ],
-                routeWhileDragging: false,
-                showAlternatives: false,
-                fitSelectedRoutes: true,
-                lineOptions: {
-                    styles: [
-                        {color: '#4285F4', opacity: 0.8, weight: 6},
-                        {color: 'white', opacity: 0.5, weight: 4}
-                    ]
-                },
-                altLineOptions: {
-                    styles: [
-                        {color: '#4285F4', opacity: 0.4, weight: 6},
-                        {color: 'white', opacity: 0.3, weight: 4}
-                    ]
-                },
-                createMarker: function() { return null; } // Don't create extra markers
-            }).addTo(map);
-            
-            // Process route information and display step-by-step directions
-            routingControl.on('routesfound', function(e) {
-                const routes = e.routes;
-                const summary = routes[0].summary;
-                const instructions = routes[0].instructions;
-                const distance = (summary.totalDistance / 1000).toFixed(1); // km
-                const time = Math.round(summary.totalTime / 60); // minutes
-                
-                // Show the clear route button
-                document.getElementById('clear-route').style.display = 'block';
-                
-                // Update the directions panel
-                const directionsPanel = document.getElementById('directions-panel');
-                const directionsSteps = document.getElementById('directions-steps');
-                
-                // Clear previous directions
-                directionsSteps.innerHTML = '';
-                
-                // Set destination in header
-                document.querySelector('.directions-title').textContent = `Directions to ${destinationName}`;
-                
-                // Add each step to the directions panel
-                instructions.forEach((instruction, index) => {
-                    if (instruction.type !== 'WaypointReached') {
-                        const stepElement = document.createElement('div');
-                        stepElement.className = 'direction-step';
-                        
-                        // Create step number icon
-                        const stepIcon = document.createElement('div');
-                        stepIcon.className = 'step-icon';
-                        stepIcon.textContent = index + 1;
-                        stepElement.appendChild(stepIcon);
-                        
-                        // Create step instruction
-                        const stepInstruction = document.createElement('div');
-                        stepInstruction.className = 'step-instruction';
-                        stepInstruction.textContent = formatInstructions(instruction.text);
-                        
-                        // Add distance for this step
-                        if (instruction.distance > 0) {
-                            const stepDistance = document.createElement('div');
-                            stepDistance.className = 'step-distance';
-                            
-                            // Format distance based on length
-                            if (instruction.distance >= 1000) {
-                                stepDistance.textContent = `${(instruction.distance / 1000).toFixed(1)} km`;
-                            } else {
-                                stepDistance.textContent = `${Math.round(instruction.distance)} m`;
-                            }
-                            
-                            stepInstruction.appendChild(stepDistance);
-                        }
-                        
-                        stepElement.appendChild(stepInstruction);
-                        directionsSteps.appendChild(stepElement);
-                    }
-                });
-                
-                // Update total distance and time
-                document.getElementById('total-distance').textContent = `${distance} km`;
-                document.getElementById('total-time').textContent = `${time} min`;
-                
-                // Show the directions panel
-                directionsPanel.style.display = 'block';
-            });
-            
-            // Add a class to hide the default routing instructions
-            const routingContainer = document.querySelector('.leaflet-routing-container');
-            if (routingContainer) {
-                routingContainer.classList.add('routing-control');
-            }
+      } else {
+        sidebar.classList.toggle("open");
+      }
+    }
+    
+    // Pan to specific resort
+    function panToResort(resortId) {
+      const resort = resorts[resortId];
+      map.setView([resort.lat, resort.lng], 18, {
+        animate: true,
+        duration: 1
+      });
+      
+      highlightMarker(resortId);
+      showResortInfo(resortId);
+      
+      // On mobile, close sidebar after selection
+      if (window.innerWidth <= 768) {
+        toggleSidebar(false);
+      }
+    }
+    
+    // Highlight marker
+    function highlightMarker(resortId) {
+      // Reset previous active marker if exists
+      if (activeMarker && markers[activeMarker]) {
+        const markerElement = markers[activeMarker].getElement();
+        if (markerElement) {
+          markerElement.querySelector('svg').style.transform = '';
+          markerElement.querySelector('svg path').style.fill = '#3498db';
         }
+      }
+      
+      // Set new active marker
+      activeMarker = resortId;
+      
+      // Highlight the marker
+      const markerElement = markers[resortId].getElement();
+      if (markerElement) {
+        markerElement.querySelector('svg').style.transform = 'scale(1.3)';
+        markerElement.querySelector('svg path').style.fill = '#e74c3c';
         
-        // Clear route button
-        document.getElementById('clear-route').addEventListener('click', function() {
-            if (routingControl) {
-                map.removeControl(routingControl);
-                routingControl = null;
-                this.style.display = 'none';
-                
-                // Hide directions panel
-                document.getElementById('directions-panel').style.display = 'none';
-            }
-        });
-        
-        // Function to pan to a specific location
-        function panToLocation(lat, lng) {
-            map.panTo(new L.LatLng(lat, lng));
-            
-            // Find the matching location and open its popup
-            for (let location of locations) {
-                if (location.lat === lat && location.lng === lng) {
-                    const locationName = location.name;
-                    selectedDestination = {
-                        latlng: [lat, lng],
-                        name: locationName
-                    };
-                    if (markers[locationName]) {
-                        markers[locationName].openPopup();
-                        
-                        // Show the directions button if user location is available
-                        if (userPosition) {
-                            setTimeout(() => {
-                                const directionsBtn = document.querySelector('.directions-button');
-                                if (directionsBtn) {
-                                    directionsBtn.style.display = 'flex';
-                                }
-                            }, 100);
-                        }
-                    }
-                    break;
-                }
-            }
+        // Add bounce animation
+        markerElement.classList.add('marker-bounce');
+        setTimeout(() => {
+          markerElement.classList.remove('marker-bounce');
+        }, 800);
+      }
+    }
+    
+    // Show resort info
+    function showResortInfo(resortId) {
+      const resort = resorts[resortId];
+      document.getElementById("info-title").textContent = resort.name;
+      document.getElementById("info-address").textContent = resort.address;
+      document.getElementById("info-description").textContent = resort.description;
+      document.getElementById("info-facilities").textContent = resort.facilities;
+      
+      // Update website link
+      const websiteLink = document.getElementById("info-website");
+      websiteLink.href = resort.website;
+      
+      const infoPanel = document.getElementById("resort-info");
+      infoPanel.classList.add("visible");
+    }
+    
+    // Close resort info
+    function closeResortInfo() {
+      document.getElementById("resort-info").classList.remove("visible");
+      
+      // Reset active marker
+      if (activeMarker && markers[activeMarker]) {
+        const markerElement = markers[activeMarker].getElement();
+        if (markerElement) {
+          markerElement.querySelector('svg').style.transform = '';
+          markerElement.querySelector('svg path').style.fill = '#3498db';
         }
-        
-        // Search functionality
-        document.querySelector('.search-button').addEventListener('click', function() {
-            const searchTerm = document.querySelector('.search-box').value.toLowerCase();
-            
-            // Simple search implementation - find matching location
-            const foundLocation = locations.find(location => 
-                location.name.toLowerCase().includes(searchTerm)
-            );
-            
-            if (foundLocation) {
-                panToLocation(foundLocation.lat, foundLocation.lng);
-            } else {
-                alert('Location not found in Pansol area.');
-            }
-        });
-        
-        // Handle Enter key in search box
-        document.querySelector('.search-box').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.querySelector('.search-button').click();
-            }
-        });
-    </script>
+      }
+      activeMarker = null;
+    }
+    
+    // View all resorts
+    function viewAllResorts() {
+      // Open sidebar
+      toggleSidebar(true);
+      
+      // Create bounds object
+      const bounds = [];
+      for (const resort of Object.values(resorts)) {
+        bounds.push([resort.lat, resort.lng]);
+      }
+      
+      // Fit map to bounds with padding
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        animate: true,
+        duration: 0.8
+      });
+      
+      // Close any open info window
+      closeResortInfo();
+    }
+  </script>
 </body>
 </html>
