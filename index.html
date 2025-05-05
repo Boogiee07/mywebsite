@@ -69,6 +69,105 @@
       flex-grow: 1;
     }
     
+    /* Search bar styles */
+    .search-container {
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .search-title {
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      color: #333;
+    }
+    
+    .search-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .search-form label {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 3px;
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 10px;
+    }
+    
+    .search-input, .search-select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .checkbox-item input {
+      margin: 0;
+    }
+    
+    .search-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .search-btn:hover {
+      background-color: #2980b9;
+    }
+    
+    .reset-btn {
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      margin-top: 5px;
+    }
+    
+    .reset-btn:hover {
+      background-color: #7f8c8d;
+    }
+    
+    .filter-notice {
+      background-color: #e7f4fd;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #2980b9;
+      display: none;
+    }
+    
+    .filter-notice.active {
+      display: block;
+    }
     
     /* Control buttons */
     .controls {
@@ -110,7 +209,6 @@
       width: 40px;
       height: 40px;
     }
-
   
     .view-all-btn {
       position: absolute;
@@ -174,6 +272,12 @@
     .place-address {
       font-size: 13px;
       color: #6c757d;
+    }
+    
+    .place-details {
+      font-size: 12px;
+      color: #3498db;
+      margin-top: 5px;
     }
     
     /* Resort info panel */
@@ -280,6 +384,14 @@
       transform: translateY(-2px);
     }
     
+    .no-results {
+      padding: 20px;
+      text-align: center;
+      color: #7f8c8d;
+      font-style: italic;
+      display: none;
+    }
+    
     /* Responsive styles */
     @media (max-width: 768px) {
       .sidebar {
@@ -307,6 +419,10 @@
       .btn-text span {
         display: none;
       }
+      
+      .checkbox-group {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -318,62 +434,76 @@
       <h2 class="sidebar-title">Laguna Resorts</h2>
       <button class="sidebar-close" id="sidebar-close">&times;</button>
     </div>
-    <div class="sidebar-content">
-      <div class="place-item" onclick="panToResort('lagunaHotSpring')">
-        <div class="place-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-          </svg>
-        </div>
-        <div class="place-info">
-          <div class="place-name">Laguna Hot Spring Resort</div>
-          <div class="place-address">Pansol, Calamba, Laguna</div>
-        </div>
+    
+    <div class="search-container">
+      <h3 class="search-title">Search Resorts</h3>
+      <div class="filter-notice" id="filter-notice">
+        Showing filtered results. <a href="#" onclick="resetFilters(); return false;">Clear all filters</a>
       </div>
-      <div class="place-item" onclick="panToResort('villaMejia')">
-        <div class="place-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-          </svg>
+      <form class="search-form" id="search-form" onsubmit="searchResorts(event)">
+        <div class="form-group">
+          <label for="bedrooms">Number of Bedrooms:</label>
+          <select id="bedrooms" class="search-select">
+            <option value="">Any</option>
+            <option value="1">1+ Bedroom</option>
+            <option value="2">2+ Bedrooms</option>
+            <option value="3">3+ Bedrooms</option>
+            <option value="4">4+ Bedrooms</option>
+            <option value="5">5+ Bedrooms</option>
+          </select>
         </div>
-        <div class="place-info">
-          <div class="place-name">Villa Mejia</div>
-          <div class="place-address">Pansol, Calamba, Laguna</div>
+        
+        <div class="form-group">
+          <label for="price">Price Range:</label>
+          <select id="price" class="search-select">
+            <option value="">Any</option>
+            <option value="budget">Budget (Under ₱5,000)</option>
+            <option value="mid">Mid-range (₱5,000-₱10,000)</option>
+            <option value="premium">Premium (₱10,000+)</option>
+          </select>
         </div>
-      </div>
-      <div class="place-item" onclick="panToResort('glennettesHaven')">
-         <div class="place-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-          </svg>
+        
+        <div class="form-group">
+          <label>Amenities:</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="hot-spring" value="hot-spring">
+              <label for="hot-spring">Hot Spring</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="karaoke" value="karaoke">
+              <label for="karaoke">Karaoke</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="wifi" value="wifi">
+              <label for="wifi">WiFi</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="aircon" value="aircon">
+              <label for="aircon">Air Conditioning</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="parking" value="parking">
+              <label for="parking">Parking</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="kitchen" value="kitchen">
+              <label for="kitchen">Kitchen</label>
+            </div>
+          </div>
         </div>
-        <div class="place-info">
-          <div class="place-name">Glennette's Haven Private Resort</div>
-          <div class="place-address">Pansol, Calamba, Laguna</div>
-        </div>
-      </div>
-      <div class="place-item" onclick="panToResort('elysianSourire')">
-        <div class="place-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-          </svg>
-        </div>
-        <div class="place-info">
-          <div class="place-name">Elysian Sourire Resort</div>
-          <div class="place-address">Pansol, Calamba, Laguna</div>
-        </div>
-      </div>
-      <div class="place-item" onclick="panToResort('villaFrancesca')">
-        <div class="place-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-          </svg>
-        </div>
-        <div class="place-info">
-          <div class="place-name">Villa Francesca Private Resort - Pansol</div>
-          <div class="place-address">Pansol, Calamba, Laguna</div>
-        </div>
-      </div>
+        
+        <button type="submit" class="search-btn">Search</button>
+        <button type="button" class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+      </form>
+    </div>
+    
+    <div class="sidebar-content" id="resort-list">
+      <!-- Resort list will be populated dynamically -->
+    </div>
+    
+    <div class="no-results" id="no-results">
+      No resorts match your search criteria. Please try different filters.
     </div>
   </div>
   
@@ -385,7 +515,6 @@
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
-    
   </div>
   
   <button class="view-all-btn" id="view-all-btn">View All Resorts</button>
@@ -395,10 +524,14 @@
     <h3 id="info-title"></h3>
     <div class="info-label">Location</div>
     <p id="info-address"></p>
+    <div class="info-label">Details</div>
+    <p id="info-details"></p>
     <div class="info-label">About</div>
     <p id="info-description"></p>
     <div class="info-label">Facilities</div>
     <p id="info-facilities"></p>
+    <div class="info-label">Price</div>
+    <p id="info-price"></p>
     <div id="website-container">
       <a href="#" id="info-website" class="website-btn" target="_blank">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px;">
@@ -412,7 +545,7 @@
   </div>
   
   <script>
-    // Resort data
+    // Enhanced resort data with search criteria
     const resorts = {
       lagunaHotSpring: {
         name: "Laguna Hot Spring Resort",
@@ -421,7 +554,12 @@
         facilities: "Swimming pools, Hot spring baths, Cottages, Function halls, Restaurant, Parking",
         lat: 14.179855690866304,
         lng: 121.1837820447193,
-        website: "1_RESORT.html"
+        website: "1_RESORT.html",
+        // Search criteria
+        bedrooms: 3,
+        price: "mid", // ₱7,500 per night
+        amenities: ["hot-spring", "parking", "kitchen", "wifi"],
+        priceValue: "₱7,500 per night"
       },
       villaMejia: {
         name: "Villa Mejia",
@@ -430,7 +568,12 @@
         facilities: "Private pools, Event space, Kitchen facilities, Barbecue area, Air-conditioned rooms",
         lat: 14.179350807676604,
         lng: 121.18485773727306,
-        website: "2_RESORT.html"
+        website: "2_RESORT.html",
+        // Search criteria
+        bedrooms: 4,
+        price: "premium", // ₱12,000 per night
+        amenities: ["aircon", "kitchen", "parking"],
+        priceValue: "₱12,000 per night"
       },
       glennettesHaven: {
         name: "Glennette's Haven Private Resort",
@@ -439,7 +582,12 @@
         facilities: "Hot spring pools, Karaoke, Videoke, Outdoor grilling area, WiFi",
         lat: 14.179889853295485,
         lng: 121.1861350014737,
-        website: "3_RESORT.html"
+        website: "3_RESORT.html",
+        // Search criteria
+        bedrooms: 2,
+        price: "budget", // ₱4,500 per night
+        amenities: ["hot-spring", "karaoke", "wifi"],
+        priceValue: "₱4,500 per night"
       },
       elysianSourire: {
         name: "Elysian Sourire Resort",
@@ -448,7 +596,12 @@
         facilities: "Heated pools, Spa services, Gazebo, Garden area, Outdoor dining",
         lat: 14.17950049393675,
         lng: 121.18694386655233,
-        website: "4_RESORT.html"
+        website: "4_RESORT.html",
+        // Search criteria
+        bedrooms: 5,
+        price: "premium", // ₱15,000 per night
+        amenities: ["hot-spring", "wifi", "aircon", "parking"],
+        priceValue: "₱15,000 per night"
       },
       villaFrancesca: {
         name: "Villa Francesca Private Resort - Pansol",
@@ -457,7 +610,12 @@
         facilities: "Multiple swimming pools, Function hall, Videoke, Cottages, Playground",
         lat: 14.180012234621406,
         lng: 121.1871543967939,
-        website: "5_RESORT.html"
+        website: "5_RESORT.html",
+        // Search criteria
+        bedrooms: 6,
+        price: "premium", // ₱18,000 per night
+        amenities: ["karaoke", "aircon", "kitchen", "parking"],
+        priceValue: "₱18,000 per night"
       }
     };
     
@@ -465,6 +623,7 @@
     let map;
     let markers = {};
     let activeMarker = null;
+    let filteredResorts = {};
     
     // Initialize map using Leaflet
     function initMap() {
@@ -509,6 +668,152 @@
           highlightMarker(id);
         });
       }
+      
+      // Initialize the resort list
+      populateResortList(resorts);
+    }
+    
+    // Populate resort list in sidebar
+    function populateResortList(resortsToShow) {
+      const resortList = document.getElementById("resort-list");
+      resortList.innerHTML = "";
+      
+      // Check if there are no results
+      if (Object.keys(resortsToShow).length === 0) {
+        document.getElementById("no-results").style.display = "block";
+      } else {
+        document.getElementById("no-results").style.display = "none";
+        
+        // Add each resort to the list
+        for (const [id, resort] of Object.entries(resortsToShow)) {
+          const resortElement = document.createElement("div");
+          resortElement.className = "place-item";
+          resortElement.onclick = function() {
+            panToResort(id);
+          };
+          
+          resortElement.innerHTML = `
+            <div class="place-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+              </svg>
+            </div>
+            <div class="place-info">
+              <div class="place-name">${resort.name}</div>
+              <div class="place-address">${resort.address}</div>
+              <div class="place-details">${resort.bedrooms} bedrooms • ${resort.priceValue}</div>
+            </div>
+          `;
+          
+          resortList.appendChild(resortElement);
+        }
+      }
+    }
+    
+    // Search resorts based on criteria
+    function searchResorts(event) {
+      if (event) {
+        event.preventDefault();
+      }
+      
+      const bedroomsValue = document.getElementById("bedrooms").value;
+      const priceValue = document.getElementById("price").value;
+      
+      // Get selected amenities
+      const selectedAmenities = [];
+      document.querySelectorAll('.checkbox-group input:checked').forEach(checkbox => {
+        selectedAmenities.push(checkbox.value);
+      });
+      
+      // Filter resorts
+      filteredResorts = {};
+      for (const [id, resort] of Object.entries(resorts)) {
+        let matches = true;
+        
+        // Check bedrooms
+        if (bedroomsValue && resort.bedrooms < parseInt(bedroomsValue)) {
+          matches = false;
+        }
+        
+        // Check price range
+        if (priceValue && resort.price !== priceValue) {
+          matches = false;
+        }
+        
+        // Check amenities
+        if (selectedAmenities.length > 0) {
+          for (const amenity of selectedAmenities) {
+            if (!resort.amenities.includes(amenity)) {
+              matches = false;
+              break;
+            }
+          }
+        }
+        
+        // Add to filtered results if it matches
+        if (matches) {
+          filteredResorts[id] = resort;
+        }
+      }
+      
+      // Show filter notice
+      const isFiltered = 
+        bedroomsValue !== "" || 
+        priceValue !== "" || 
+        selectedAmenities.length > 0;
+        
+      document.getElementById("filter-notice").classList.toggle("active", isFiltered);
+      
+      // Update the list and map
+      populateResortList(filteredResorts);
+      
+      // If we have filtered results, fit the map to show them
+      if (Object.keys(filteredResorts).length > 0) {
+        const bounds = [];
+        for (const resort of Object.values(filteredResorts)) {
+          bounds.push([resort.lat, resort.lng]);
+        }
+        
+        if (bounds.length > 1) {
+          map.fitBounds(bounds, {
+            padding: [50, 50],
+            animate: true,
+            duration: 0.8
+          });
+        } else if (bounds.length === 1) {
+          map.setView(bounds[0], 17, {
+            animate: true,
+            duration: 0.8
+          });
+        }
+      }
+      
+      // On mobile, keep sidebar open to show results
+      if (window.innerWidth <= 768) {
+        toggleSidebar(true);
+      }
+    }
+    
+    // Reset all filters
+    function resetFilters() {
+      // Reset form fields
+      document.getElementById("bedrooms").value = "";
+      document.getElementById("price").value = "";
+      
+      // Uncheck all amenities
+      document.querySelectorAll('.checkbox-group input').forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      
+      // Hide filter notice
+      document.getElementById("filter-notice").classList.remove("active");
+      
+      // Show all resorts
+      filteredResorts = resorts;
+      populateResortList(resorts);
+      
+      // Fit map to show all resorts
+      viewAllResorts();
     }
     
     // Call initMap when the page loads
@@ -539,6 +844,9 @@
           toggleSidebar(false);
         }
       });
+      
+      // Initially populate with all resorts
+      filteredResorts = resorts;
     };
     
     // Toggle sidebar
@@ -557,102 +865,195 @@
     }
     
     // Pan to specific resort
-    function panToResort(resortId) {
-      const resort = resorts[resortId];
-      map.setView([resort.lat, resort.lng], 18, {
-        animate: true,
-        duration: 1
-      });
+function panToResort(id) {
+  const resort = resorts[id];
+  if (!resort) return;
+  
+  // Pan map to resort location
+  map.setView([resort.lat, resort.lng], 17, {
+    animate: true,
+    duration: 0.8
+  });
+  
+  // Show the resort info
+  showResortInfo(id);
+  
+  // Highlight the marker
+  highlightMarker(id);
+  
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    toggleSidebar(false);
+  }
+}
+
+// Show all resorts on map
+function viewAllResorts() {
+  // Create bounds for all resorts or filtered resorts
+  const bounds = [];
+  for (const resort of Object.values(filteredResorts)) {
+    bounds.push([resort.lat, resort.lng]);
+  }
+  
+  // Fit map to bounds
+  if (bounds.length > 0) {
+    map.fitBounds(bounds, {
+      padding: [50, 50],
+      animate: true,
+      duration: 0.8
+    });
+  }
+  
+  // Clear any active marker highlight
+  if (activeMarker) {
+    const el = activeMarker.getElement();
+    if (el) el.querySelector('svg path').setAttribute('fill', '#3498db');
+    activeMarker = null;
+  }
+  
+  // Close resort info panel
+  closeResortInfo();
+}
+
+// Show resort info panel
+function showResortInfo(id) {
+  const resort = resorts[id];
+  if (!resort) return;
+  
+  // Fill in resort info
+  document.getElementById("info-title").textContent = resort.name;
+  document.getElementById("info-address").textContent = resort.address;
+  document.getElementById("info-description").textContent = resort.description;
+  document.getElementById("info-facilities").textContent = resort.facilities;
+  document.getElementById("info-details").textContent = `${resort.bedrooms} Bedroom(s)`;
+  document.getElementById("info-price").textContent = resort.priceValue;
+  
+  // Set website link
+  const websiteLink = document.getElementById("info-website");
+  websiteLink.href = resort.website;
+  
+  // Show the panel
+  document.getElementById("resort-info").classList.add("visible");
+}
+
+// Close resort info panel
+function closeResortInfo() {
+  document.getElementById("resort-info").classList.remove("visible");
+  
+  // Clear active marker highlight
+  if (activeMarker) {
+    const el = activeMarker.getElement();
+    if (el) el.querySelector('svg path').setAttribute('fill', '#3498db');
+    activeMarker = null;
+  }
+}
+
+// Highlight marker
+function highlightMarker(id) {
+  // Reset previous active marker
+  if (activeMarker) {
+    const el = activeMarker.getElement();
+    if (el) el.querySelector('svg path').setAttribute('fill', '#3498db');
+  }
+  
+  // Set new active marker
+  activeMarker = markers[id];
+  if (activeMarker) {
+    const el = activeMarker.getElement();
+    if (el) {
+      el.querySelector('svg path').setAttribute('fill', '#e74c3c');
       
-      highlightMarker(resortId);
-      showResortInfo(resortId);
+      // Add bounce animation
+      el.classList.add('marker-bounce');
       
-      // On mobile, close sidebar after selection
-      if (window.innerWidth <= 768) {
-        toggleSidebar(false);
-      }
+      // Remove animation after a second
+      setTimeout(() => {
+        el.classList.remove('marker-bounce');
+      }, 1000);
     }
+  }
+}
+
+// Handle window resize
+window.addEventListener('resize', function() {
+  // Resize map to fill container
+  if (map) {
+    map.invalidateSize();
+  }
+});
+
+// Add event listener for escape key to close panels
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeResortInfo();
     
-    // Highlight marker
-    function highlightMarker(resortId) {
-      // Reset previous active marker if exists
-      if (activeMarker && markers[activeMarker]) {
-        const markerElement = markers[activeMarker].getElement();
-        if (markerElement) {
-          markerElement.querySelector('svg').style.transform = '';
-          markerElement.querySelector('svg path').style.fill = '#3498db';
-        }
-      }
-      
-      // Set new active marker
-      activeMarker = resortId;
-      
-      // Highlight the marker
-      const markerElement = markers[resortId].getElement();
-      if (markerElement) {
-        markerElement.querySelector('svg').style.transform = 'scale(1.3)';
-        markerElement.querySelector('svg path').style.fill = '#e74c3c';
-        
-        // Add bounce animation
-        markerElement.classList.add('marker-bounce');
-        setTimeout(() => {
-          markerElement.classList.remove('marker-bounce');
-        }, 800);
-      }
+    // On mobile, also close sidebar
+    if (window.innerWidth <= 768) {
+      toggleSidebar(false);
     }
+  }
+});
+
+// Function to handle resort details click from list
+function showResortDetails(id, event) {
+  event.stopPropagation(); // Prevent triggering the parent click
+  showResortInfo(id);
+  highlightMarker(id);
+}
+
+// Add touch events for better mobile support
+let touchStartX = 0;
+let touchEndX = 0;
+
+// Check if swipe was at least 100px
+function checkSwipeDirection() {
+  if (touchEndX - touchStartX > 100) {
+    // Swipe right - open sidebar
+    toggleSidebar(true);
+  } else if (touchStartX - touchEndX > 100) {
+    // Swipe left - close sidebar
+    toggleSidebar(false);
+  }
+}
+
+// Add touch event listeners
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  checkSwipeDirection();
+});
+
+// Function to handle resort rating system
+function rateResort(id, rating) {
+  // This would typically connect to a backend
+  console.log(`Resort ${id} rated ${rating} stars`);
+  
+  // For demo purposes, show a thank you message
+  const ratingContainer = document.getElementById(`rating-${id}`);
+  if (ratingContainer) {
+    ratingContainer.innerHTML = '<div class="rating-thanks">Thanks for your feedback!</div>';
     
-    // Show resort info
-    function showResortInfo(resortId) {
-      const resort = resorts[resortId];
-      document.getElementById("info-title").textContent = resort.name;
-      document.getElementById("info-address").textContent = resort.address;
-      document.getElementById("info-description").textContent = resort.description;
-      document.getElementById("info-facilities").textContent = resort.facilities;
-      
-      // Update website link
-      const websiteLink = document.getElementById("info-website");
-      websiteLink.href = resort.website;
-      
-      const infoPanel = document.getElementById("resort-info");
-      infoPanel.classList.add("visible");
-    }
-    
-    // Close resort info
-    function closeResortInfo() {
-      document.getElementById("resort-info").classList.remove("visible");
-      
-      // Reset active marker
-      if (activeMarker && markers[activeMarker]) {
-        const markerElement = markers[activeMarker].getElement();
-        if (markerElement) {
-          markerElement.querySelector('svg').style.transform = '';
-          markerElement.querySelector('svg path').style.fill = '#3498db';
-        }
-      }
-      activeMarker = null;
-    }
-    
-    // View all resorts
-    function viewAllResorts() {
-      // Open sidebar
-      toggleSidebar(true);
-      
-      // Create bounds object
-      const bounds = [];
-      for (const resort of Object.values(resorts)) {
-        bounds.push([resort.lat, resort.lng]);
-      }
-      
-      // Fit map to bounds with padding
-      map.fitBounds(bounds, {
-        padding: [50, 50],
-        animate: true,
-        duration: 0.8
-      });
-      
-      // Close any open info window
-      closeResortInfo();
-    }
-  </script>
+    // Reset after 3 seconds
+    setTimeout(() => {
+      renderRatingStars(id, ratingContainer);
+    }, 3000);
+  }
+}
+
+// Function to render rating stars
+function renderRatingStars(id, container) {
+  const starsHTML = `
+    <div class="rating-stars">
+      ${[1, 2, 3, 4, 5].map(star => `
+        <span class="star" onclick="rateResort('${id}', ${star})">★</span>
+      `).join('')}
+    </div>
+  `;
+  container.innerHTML = starsHTML;
+}
+</script>
 </body>
 </html>
