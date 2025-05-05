@@ -6,13 +6,24 @@
   <title>Pansol Paradise Resort - Hot Spring Haven</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+    :root {
+      --primary-color: #0066cc;
+      --accent-color: #ffeb3b;
+      --text-color: #333;
+      --background-color: #f5f5f5;
+      --card-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      --perspective: 1000px;
+    }
+    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f5f5f5;
-      color: #333;
+      background-color: var(--background-color);
+      color: var(--text-color);
       scroll-behavior: smooth;
+      perspective: var(--perspective);
+      overflow-x: hidden;
     }
     header {
       background-color: #0066cc;
@@ -35,6 +46,23 @@
       color: white;
       text-align: center;
       position: relative;
+      transform-style: preserve-3d;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/api/placeholder/1200/500');
+      background-size: cover;
+      background-position: center;
+      transform: translateZ(-50px) scale(1.2);
+      filter: blur(5px);
+      z-index: -1;
     }
     .hero-content {
       z-index: 2;
@@ -67,13 +95,15 @@
       position: relative;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      box-shadow: var(--card-shadow);
       height: 250px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
     }
     .facility-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+      box-shadow: 0 20px 30px rgba(0,0,0,0.25);
     }
     .facility-item img {
       width: 100%;
@@ -137,7 +167,13 @@
       text-align: center;
       margin-bottom: 2rem;
       position: relative;
-      padding-bottom: 15px;
+      padding-bottom: 20px;
+      transform-style: preserve-3d;
+      transform: translateZ(0);
+      transition: transform 0.5s ease;
+    }
+    .section-title:hover {
+      transform: translateZ(20px);
     }
     .section-title:after {
       content: '';
@@ -147,7 +183,8 @@
       transform: translateX(-50%);
       width: 80px;
       height: 3px;
-      background-color: #0066cc;
+      background-color: var(--primary-color);
+      box-shadow: 0 2px 10px rgba(0, 102, 204, 0.5);
     }
     
     /* Carousel Styles */
@@ -158,7 +195,9 @@
       overflow: hidden;
       margin: 2rem 0;
       border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      box-shadow: var(--card-shadow);
+      transform-style: preserve-3d;
+      perspective: 1500px;
     }
     .carousel-inner {
       display: flex;
@@ -169,6 +208,8 @@
       min-width: 100%;
       height: 100%;
       position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.5s ease;
     }
     .carousel-item img {
       width: 100%;
@@ -246,11 +287,15 @@
       height: 250px;
       object-fit: cover;
       border-radius: 5px;
-      transition: transform 0.3s ease;
+      transition: all 0.5s ease;
       cursor: pointer;
+      transform-style: preserve-3d;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     .gallery img:hover {
-      transform: scale(1.03);
+      transform: scale(1.05) translateZ(30px) rotateX(5deg);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      filter: brightness(1.1);
     }
     .btn {
       display: inline-block;
@@ -472,19 +517,19 @@
       // Event listeners for controls
       prevBtn.addEventListener('click', () => {
         currentIndex = (currentIndex - 1 + totalItems) % totalItems;
-        updateCarousel();
+        updateCarousel(true);
       });
       
       nextBtn.addEventListener('click', () => {
         currentIndex = (currentIndex + 1) % totalItems;
-        updateCarousel();
+        updateCarousel(true);
       });
       
       // Event listeners for indicators
       indicators.forEach((indicator, index) => {
         indicator.addEventListener('click', () => {
           currentIndex = index;
-          updateCarousel();
+          updateCarousel(true);
         });
       });
       
@@ -506,9 +551,30 @@
         }, 5000);
       });
       
-      // Update carousel position and indicators
-      function updateCarousel() {
-        carouselInner.style.transform = `translateX(-${currentIndex * 100}%)`;
+      // Update carousel position and indicators with 3D effect
+      function updateCarousel(isUserInteraction = false) {
+        items.forEach((item, index) => {
+          if (index === currentIndex) {
+            item.style.transform = 'translateX(' + (-currentIndex * 100) + '%) translateZ(50px) scale(1)';
+            item.style.zIndex = '5';
+            item.style.opacity = '1';
+          } else if (index < currentIndex) {
+            item.style.transform = 'translateX(' + (-currentIndex * 100) + '%) translateZ(-50px) scale(0.8) rotateY(-20deg)';
+            item.style.zIndex = '1';
+            item.style.opacity = '0.5';
+          } else {
+            item.style.transform = 'translateX(' + (-currentIndex * 100) + '%) translateZ(-50px) scale(0.8) rotateY(20deg)';
+            item.style.zIndex = '1';
+            item.style.opacity = '0.5';
+          }
+        });
+        
+        // Additional transform for the carousel inner
+        if (isUserInteraction) {
+          carouselInner.style.transition = 'transform 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+        } else {
+          carouselInner.style.transition = 'transform 0.7s ease';
+        }
         
         // Update indicators
         indicators.forEach((indicator, index) => {
@@ -541,11 +607,11 @@
           // Swipe right - previous slide
           currentIndex = (currentIndex - 1 + totalItems) % totalItems;
         }
-        updateCarousel();
+        updateCarousel(true);
       }
     });
 
-    // Smooth scrolling for navigation
+    // Smooth scrolling for navigation with 3D effect
     document.querySelectorAll('nav a').forEach(anchor => {
       anchor.addEventListener('click', function(e) {
         e.preventDefault();
@@ -557,6 +623,68 @@
           top: targetElement.offsetTop - 60,
           behavior: 'smooth'
         });
+      });
+    });
+    
+    // 3D Parallax effect for facility items
+    const facilities = document.querySelectorAll('.facility-item');
+    
+    facilities.forEach(item => {
+      item.addEventListener('mousemove', (e) => {
+        const { left, top, width, height } = item.getBoundingClientRect();
+        const x = (e.clientX - left) / width - 0.5;
+        const y = (e.clientY - top) / height - 0.5;
+        
+        item.style.transform = `perspective(1000px) 
+                               rotateY(${x * 10}deg) 
+                               rotateX(${-y * 10}deg) 
+                               translateZ(20px)`;
+      });
+      
+      item.addEventListener('mouseleave', () => {
+        item.style.transform = 'perspective(1000px) rotateY(0) rotateX(0) translateZ(0)';
+      });
+    });
+    
+    // 3D effect for gallery images
+    const galleryImages = document.querySelectorAll('.gallery img');
+    
+    galleryImages.forEach(img => {
+      img.addEventListener('mousemove', (e) => {
+        const { left, top, width, height } = img.getBoundingClientRect();
+        const x = (e.clientX - left) / width - 0.5;
+        const y = (e.clientY - top) / height - 0.5;
+        
+        img.style.transform = `perspective(1000px) 
+                              rotateY(${x * 15}deg) 
+                              rotateX(${-y * 15}deg) 
+                              translateZ(30px)`;
+      });
+      
+      img.addEventListener('mouseleave', () => {
+        img.style.transform = 'perspective(1000px) rotateY(0) rotateX(0) translateZ(0)';
+      });
+    });
+    
+    // Add parallax scrolling effect to sections
+    window.addEventListener('scroll', () => {
+      const scrollPosition = window.pageYOffset;
+      
+      // Parallax effect for hero section
+      const hero = document.querySelector('.hero');
+      if (hero) {
+        hero.style.backgroundPosition = `50% ${50 + scrollPosition * 0.05}%`;
+      }
+      
+      // Transform effect for sections
+      document.querySelectorAll('.section-title').forEach(title => {
+        const titlePosition = title.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+        
+        if (titlePosition < windowHeight * 0.8 && titlePosition > -windowHeight * 0.2) {
+          const factor = 1 - Math.abs(titlePosition - windowHeight * 0.5) / (windowHeight * 0.5);
+          title.style.transform = `translateZ(${factor * 30}px)`;
+        }
       });
     });
   </script>
