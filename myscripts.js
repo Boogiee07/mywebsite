@@ -7,7 +7,7 @@
         facilities: "Swimming pools, Hot spring baths, Cottages, Function halls, Restaurant, Parking",
         lat: 14.179855690866304,
         lng: 121.1837820447193,
-        website: "/resorts/01_resort.html",
+        website: "/resorts/1_resort.html",
         // Search criteria
         bedrooms: 3,
         price: "mid", // ₱7,500 per night
