@@ -759,30 +759,7 @@
     Thank you for your feedback!
   </div>
 
-  <!-- Admin Panel -->
-  <button class="admin-toggle" onclick="toggleAdminPanel()">Feedback</button>
-  <div class="admin-panel" id="adminPanel">
-    <h3 style="margin-top: 0;">Feedback Analytics</h3>
-    <div class="admin-stats">
-      <div class="admin-stat">
-        <span class="admin-stat-number" id="adminLikes">0</span>
-        <div class="admin-stat-label">Total Likes</div>
-      </div>
-      <div class="admin-stat">
-        <span class="admin-stat-number" id="adminDislikes">0</span>
-        <div class="admin-stat-label">Total Dislikes</div>
-      </div>
-    </div>
-    <div style="margin-bottom: 10px;">
-      <strong>Rating:</strong> 
-      <span id="adminRating">0%</span> positive
-    </div>
-    <div class="admin-actions">
-      <button class="admin-btn reset" onclick="resetFeedback()">Reset</button>
-      <button class="admin-btn export" onclick="exportData()">Export</button>
-    </div>
-  </div>
-
+  
   <script>
     // Feedback Database (using localStorage as simulation)
     class FeedbackDatabase {
