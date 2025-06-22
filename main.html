@@ -181,6 +181,12 @@
       border: 1px solid rgba(231, 76, 60, 0.3);
     }
 
+    .status-no-data {
+      background: rgba(243, 156, 18, 0.1);
+      color: var(--warning-color);
+      border: 1px solid rgba(243, 156, 18, 0.3);
+    }
+
     .resort-metrics {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -384,6 +390,18 @@
       color: #2471a3;
     }
 
+    .alert-success {
+      background: rgba(39, 174, 96, 0.1);
+      border-left: 4px solid var(--success-color);
+      color: #1e8449;
+    }
+
+    .alert-error {
+      background: rgba(231, 76, 60, 0.1);
+      border-left: 4px solid var(--danger-color);
+      color: #c0392b;
+    }
+
     .chart-container {
       background: var(--white);
       border-radius: 15px;
@@ -581,13 +599,81 @@
   </div>
 
   <script>
-    // Resort Configuration
+    // Feedback Database Class (integrated from your feedback system)
+    class FeedbackDatabase {
+      constructor(dbKey) {
+        this.dbKey = dbKey;
+        this.init();
+      }
+      
+      init() {
+        if (!localStorage.getItem(this.dbKey)) {
+          this.resetData();
+        }
+      }
+      
+      getData() {
+        try {
+          return JSON.parse(localStorage.getItem(this.dbKey));
+        } catch (e) {
+          console.error(`Error parsing localStorage data for ${this.dbKey}:`, e);
+          this.resetData();
+          return JSON.parse(localStorage.getItem(this.dbKey));
+        }
+      }
+      
+      saveData(data) {
+        localStorage.setItem(this.dbKey, JSON.stringify(data));
+      }
+      
+      getStats() {
+        const data = this.getData();
+        const total = data.stats.likes + data.stats.dislikes;
+        const positivePercentage = total > 0 ? Math.round((data.stats.likes / total) * 100) : 0;
+        
+        return {
+          likes: data.stats.likes,
+          dislikes: data.stats.dislikes,
+          total: total,
+          positivePercentage: positivePercentage,
+          lastUpdated: data.lastUpdated
+        };
+      }
+      
+      resetData() {
+        const initialData = {
+          stats: {
+            likes: 0,
+            dislikes: 0
+          },
+          feedback: [],
+          created: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        };
+        this.saveData(initialData);
+        return initialData;
+      }
+      
+      exportData() {
+        const data = this.getData();
+        const stats = this.getStats();
+        
+        return {
+          summary: stats,
+          detailedFeedback: data.feedback,
+          exportDate: new Date().toISOString()
+        };
+      }
+    }
+
+    // Resort Configuration with localStorage keys
     const RESORTS = [
       {
         id: 'laguna-hot-spring',
         name: 'Laguna Hot Spring Resort',
         url: 'RESORTS/1_resort.html',
         location: 'Pansol, Calamba, Laguna',
+        dbKey: 'laguna_resort_feedback', // This should match the key from your feedback system
         apiEndpoint: 'https://pansolmap.netlify.app/resorts/1_resort.html'
       },
       {
@@ -595,6 +681,7 @@
         name: 'Villa Mejia',
         url: 'RESORTS/2_resort.html',
         location: 'Pansol, Calamba, Laguna',
+        dbKey: 'villa_mejia_feedback',
         apiEndpoint: 'https://pansolmap.netlify.app/resorts/2_resort.html'
       },
       {
@@ -602,6 +689,7 @@
         name: 'Glennette Haven Private Resort',
         url: 'RESORTS/3_resort.html',
         location: 'Pansol, Calamba, Laguna',
+        dbKey: 'glennette_haven_feedback',
         apiEndpoint: 'https://pansolmap.netlify.app/resorts/3_resort.html'
       },
       {
@@ -609,6 +697,7 @@
         name: 'Elysian Sourire Resort',
         url: 'RESORTS/4_resort.html',
         location: 'Pansol, Calamba, Laguna',
+        dbKey: 'elysian_sourire_feedback',
         apiEndpoint: 'https://pansolmap.netlify.app/resorts/4_resort.html'
       },
       {
@@ -616,6 +705,7 @@
         name: 'Villa Francesca Private Resort - Pansol',
         url: 'RESORTS/5_resort.html',
         location: 'Pansol, Calamba, Laguna',
+        dbKey: 'villa_francesca_feedback',
         apiEndpoint: 'https://pansolmap.netlify.app/resorts/5_resort.html'
       }
     ];
@@ -630,26 +720,26 @@
 
     // Initialize dashboard
     function initializeDashboard() {
-      // Initialize resort data with demo data
+      console.log('Initializing dashboard with real feedback data...');
+      
+      // Initialize resort data with real localStorage data
       RESORTS.forEach(resort => {
+        const feedbackDB = new FeedbackDatabase(resort.dbKey);
+        const stats = feedbackDB.getStats();
+        
         dashboardData.resorts[resort.id] = {
           ...resort,
+          feedbackDB: feedbackDB,
           status: 'online',
-          likes: Math.floor(Math.random() * 100) + 50,
-          dislikes: Math.floor(Math.random() * 30) + 5,
-          totalRatings: 0,
-          positivePercentage: 0,
-          lastUpdated: new Date().toISOString(),
+          likes: stats.likes,
+          dislikes: stats.dislikes,
+          totalRatings: stats.total,
+          positivePercentage: stats.positivePercentage,
+          lastUpdated: stats.lastUpdated || new Date().toISOString(),
           isOnline: true,
-          responseTime: Math.floor(Math.random() * 500) + 100
+          responseTime: Math.floor(Math.random() * 500) + 100,
+          hasData: stats.total > 0
         };
-        
-        // Calculate metrics
-        const resort_data = dashboardData.resorts[resort.id];
-        resort_data.totalRatings = resort_data.likes + resort_data.dislikes;
-        resort_data.positivePercentage = resort_data.totalRatings > 0 
-          ? Math.round((resort_data.likes / resort_data.totalRatings) * 100) 
-          : 0;
       });
 
       renderResortCards();
@@ -657,8 +747,13 @@
       updateChart();
       startAutoRefresh();
       
-      console.log('Dashboard initialized with demo data');
-      addAlert('success', 'Dashboard initialized successfully with demo data.');
+      const totalRatings = Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.totalRatings, 0);
+      
+      if (totalRatings > 0) {
+        addAlert('success', `Dashboard initialized successfully. Found ${totalRatings} total ratings across all resorts.`);
+      } else {
+        addAlert('info', 'Dashboard initialized. No rating data found yet. Data will appear as users provide feedback on resort websites.');
+      }
     }
 
     // Render resort cards
@@ -677,8 +772,14 @@
       const card = document.createElement('div');
       card.className = 'resort-card';
       
-      const statusClass = resort.isOnline ? 'status-online' : 'status-offline';
-      const statusText = resort.isOnline ? 'Online' : 'Offline';
+      let statusClass, statusText;
+      if (!resort.hasData) {
+        statusClass = 'status-no-data';
+        statusText = 'No Data';
+      } else {
+        statusClass = resort.isOnline ? 'status-online' : 'status-offline';
+        statusText = resort.isOnline ? 'Online' : 'Offline';
+      }
       
       card.innerHTML = `
         <div class="resort-header">
@@ -732,6 +833,7 @@
 
         <div style="margin-top: 15px; font-size: 0.8rem; color: var(--text-light);">
           <i class="fas fa-clock"></i> Last updated: ${new Date(resort.lastUpdated).toLocaleTimeString()}
+          ${!resort.hasData ? '<br><i class="fas fa-info-circle"></i> No feedback data available yet' : ''}
         </div>
       `;
 
@@ -747,24 +849,33 @@
       const totalRatings = totalLikes + totalDislikes;
       const averagePositive = totalRatings > 0 ? Math.round((totalLikes / totalRatings) * 100) : 0;
       const activeResorts = resorts.filter(r => r.isOnline).length;
+      const resortsWithData = resorts.filter(r => r.hasData).length;
 
       document.getElementById('totalRatings').textContent = totalRatings;
       document.getElementById('averageRating').textContent = averagePositive + '%';
-      document.getElementById('activeResorts').textContent = activeResorts;
+      document.getElementById('activeResorts').textContent = `${resortsWithData}/${resorts.length}`;
       document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
 
       // Update change indicators
       const ratingChangeEl = document.getElementById('ratingChange');
+      const activeResortsEl = document.getElementById('activeResorts').nextElementSibling.nextElementSibling;
+      
       if (averagePositive >= 70) {
         ratingChangeEl.textContent = 'Excellent';
         ratingChangeEl.className = 'stat-change positive';
       } else if (averagePositive >= 50) {
         ratingChangeEl.textContent = 'Good';
         ratingChangeEl.className = 'stat-change';
-      } else {
+      } else if (totalRatings > 0) {
         ratingChangeEl.textContent = 'Needs attention';
         ratingChangeEl.className = 'stat-change negative';
+      } else {
+        ratingChangeEl.textContent = 'No data yet';
+        ratingChangeEl.className = 'stat-change';
       }
+
+      // Update active resorts label
+      activeResortsEl.textContent = resortsWithData === resorts.length ? 'All have data' : 'Some pending data';
     }
 
     // Update analytics chart
@@ -776,17 +887,32 @@
       const maxHeight = 250;
 
       days.forEach((day, index) => {
-        const value = Math.floor(Math.random() * 100) + 20;
-        const height = (value / 120) * maxHeight;
+        // Generate realistic data based on current resort feedback
+        const resorts = Object.values(dashboardData.resorts);
+        const totalRatings = resorts.reduce((sum, r) => sum + r.totalRatings, 0);
+        
+        // Simulate daily distribution with some variation
+        const baseValue = totalRatings > 0 ? Math.floor(totalRatings / 7) : 0;
+        const variation = Math.floor(Math.random() * 10) - 5;
+        const dayValue = Math.max(0, baseValue + variation);
+        
+        const height = totalRatings > 0 ? Math.max(20, (dayValue / Math.max(...days.map(() => baseValue + 5))) * maxHeight) : 20;
 
         const bar = document.createElement('div');
         bar.className = 'chart-bar';
         bar.style.height = height + 'px';
-        bar.innerHTML = `
-          <div class="chart-value">${value}</div>
-          <div class="chart-label">${day}</div>
-        `;
-        
+        bar.title = `${day}: ${dayValue} ratings`;
+
+        const label = document.createElement('div');
+        label.className = 'chart-label';
+        label.textContent = day;
+
+        const value = document.createElement('div');
+        value.className = 'chart-value';
+        value.textContent = dayValue;
+
+        bar.appendChild(label);
+        bar.appendChild(value);
         chart.appendChild(bar);
       });
     }
@@ -796,57 +922,75 @@
       const resort = dashboardData.resorts[resortId];
       if (!resort) return;
 
-      addAlert('info', `Refreshing data for ${resort.name}...`);
+      const refreshBtn = event.target.closest('.btn');
+      refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+      refreshBtn.disabled = true;
 
-      // Simulate API call with random data updates
       setTimeout(() => {
-        const likesChange = Math.floor(Math.random() * 10) - 2;
-        const dislikesChange = Math.floor(Math.random() * 5) - 1;
-
-        resort.likes = Math.max(0, resort.likes + likesChange);
-        resort.dislikes = Math.max(0, resort.dislikes + dislikesChange);
-        resort.totalRatings = resort.likes + resort.dislikes;
-        resort.positivePercentage = resort.totalRatings > 0 
-          ? Math.round((resort.likes / resort.totalRatings) * 100) 
-          : 0;
+        // Refresh data from localStorage
+        const stats = resort.feedbackDB.getStats();
+        
+        resort.likes = stats.likes;
+        resort.dislikes = stats.dislikes;
+        resort.totalRatings = stats.total;
+        resort.positivePercentage = stats.positivePercentage;
         resort.lastUpdated = new Date().toISOString();
+        resort.hasData = stats.total > 0;
 
         renderResortCards();
         updateOverallStats();
-        
+        updateChart();
+
         addAlert('success', `${resort.name} data refreshed successfully.`);
+        
+        refreshBtn.innerHTML = '<i class="fas fa-sync"></i> Refresh';
+        refreshBtn.disabled = false;
       }, 1000);
     }
 
-    // Refresh all resort data
+    // Reset resort data
+    function resetResortData(resortId) {
+      const resort = dashboardData.resorts[resortId];
+      if (!resort) return;
+
+      if (confirm(`Are you sure you want to reset all feedback data for ${resort.name}? This action cannot be undone.`)) {
+        resort.feedbackDB.resetData();
+        
+        const stats = resort.feedbackDB.getStats();
+        resort.likes = stats.likes;
+        resort.dislikes = stats.dislikes;
+        resort.totalRatings = stats.total;
+        resort.positivePercentage = stats.positivePercentage;
+        resort.lastUpdated = new Date().toISOString();
+        resort.hasData = false;
+
+        renderResortCards();
+        updateOverallStats();
+        updateChart();
+
+        addAlert('warning', `${resort.name} feedback data has been reset.`);
+      }
+    }
+
+    // Refresh all data
     function refreshAllData() {
-      if (dashboardData.isRefreshing) return;
-
       dashboardData.isRefreshing = true;
-      const indicator = document.getElementById('refreshIndicator');
-      const spinner = indicator.querySelector('.spinner');
-      
-      indicator.classList.add('active');
-      spinner.style.display = 'block';
-      indicator.querySelector('span').textContent = 'Refreshing all data...';
+      updateRefreshIndicator();
 
-      addAlert('info', 'Refreshing data for all resorts...');
+      const refreshBtn = event.target;
+      refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+      refreshBtn.disabled = true;
 
-      // Simulate API calls for all resorts
       setTimeout(() => {
-        Object.keys(dashboardData.resorts).forEach(resortId => {
-          const resort = dashboardData.resorts[resortId];
-          const likesChange = Math.floor(Math.random() * 8) - 2;
-          const dislikesChange = Math.floor(Math.random() * 4) - 1;
-
-          resort.likes = Math.max(0, resort.likes + likesChange);
-          resort.dislikes = Math.max(0, resort.dislikes + dislikesChange);
-          resort.totalRatings = resort.likes + resort.dislikes;
-          resort.positivePercentage = resort.totalRatings > 0 
-            ? Math.round((resort.likes / resort.totalRatings) * 100) 
-            : 0;
+        // Refresh all resort data
+        Object.values(dashboardData.resorts).forEach(resort => {
+          const stats = resort.feedbackDB.getStats();
+          resort.likes = stats.likes;
+          resort.dislikes = stats.dislikes;
+          resort.totalRatings = stats.total;
+          resort.positivePercentage = stats.positivePercentage;
           resort.lastUpdated = new Date().toISOString();
-          resort.isOnline = Math.random() > 0.1; // 90% uptime simulation
+          resort.hasData = stats.total > 0;
         });
 
         renderResortCards();
@@ -854,333 +998,245 @@
         updateChart();
 
         dashboardData.isRefreshing = false;
-        indicator.classList.remove('active');
-        spinner.style.display = 'none';
-        indicator.querySelector('span').textContent = 'Auto-refresh every 30 seconds';
+        updateRefreshIndicator();
 
-        addAlert('success', 'All resort data refreshed successfully.');
+        const totalRatings = Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.totalRatings, 0);
+        addAlert('success', `All resort data refreshed. Found ${totalRatings} total ratings.`);
+        
+        refreshBtn.innerHTML = '<i class="fas fa-sync"></i> Refresh Now';
+        refreshBtn.disabled = false;
       }, 2000);
-    }
-
-    // Reset resort data
-    function resetResortData(resortId) {
-      if (!confirm('Are you sure you want to reset all feedback data for this resort?')) {
-        return;
-      }
-
-      const resort = dashboardData.resorts[resortId];
-      resort.likes = 0;
-      resort.dislikes = 0;
-      resort.totalRatings = 0;
-      resort.positivePercentage = 0;
-      resort.lastUpdated = new Date().toISOString();
-
-      renderResortCards();
-      updateOverallStats();
-      
-      addAlert('warning', `${resort.name} feedback data has been reset.`);
     }
 
     // Export all data
     function exportAllData() {
       const exportData = {
-        timestamp: new Date().toISOString(),
         summary: {
           totalRatings: Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.totalRatings, 0),
           totalLikes: Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.likes, 0),
           totalDislikes: Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.dislikes, 0),
-          activeResorts: Object.values(dashboardData.resorts).filter(r => r.isOnline).length
+          averagePositiveRating: calculateOverallPositivePercentage(),
+          exportDate: new Date().toISOString(),
+          resortsWithData: Object.values(dashboardData.resorts).filter(r => r.hasData).length,
+          totalResorts: Object.keys(dashboardData.resorts).length
         },
-        resorts: dashboardData.resorts
+        resorts: {}
       };
 
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `resort-ratings-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
+      Object.values(dashboardData.resorts).forEach(resort => {
+        exportData.resorts[resort.id] = {
+          name: resort.name,
+          location: resort.location,
+          url: resort.url,
+          stats: {
+            likes: resort.likes,
+            dislikes: resort.dislikes,
+            total: resort.totalRatings,
+            positivePercentage: resort.positivePercentage
+          },
+          detailedFeedback: resort.feedbackDB.exportData(),
+          lastUpdated: resort.lastUpdated
+        };
+      });
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resort-ratings-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      addAlert('success', 'Data exported successfully.');
+
+      addAlert('success', 'Data exported successfully!');
+    }
+
+    // Calculate overall positive percentage
+    function calculateOverallPositivePercentage() {
+      const resorts = Object.values(dashboardData.resorts);
+      const totalLikes = resorts.reduce((sum, r) => sum + r.likes, 0);
+      const totalRatings = resorts.reduce((sum, r) => sum + r.totalRatings, 0);
+      return totalRatings > 0 ? Math.round((totalLikes / totalRatings) * 100) : 0;
     }
 
     // Add alert to alerts panel
     function addAlert(type, message) {
       const alertsPanel = document.getElementById('alertsPanel');
-      const alertDiv = document.createElement('div');
+      const existingAlerts = alertsPanel.querySelectorAll('.alert');
       
-      const iconMap = {
-        success: 'fa-check-circle',
-        warning: 'fa-exclamation-triangle',
-        info: 'fa-info-circle',
-        error: 'fa-times-circle'
-      };
+      // Remove old alerts if more than 5
+      if (existingAlerts.length > 5) {
+        existingAlerts[1].remove(); // Keep the first system alert
+      }
 
-      alertDiv.className = `alert alert-${type}`;
-      alertDiv.innerHTML = `
-        <i class="fas ${iconMap[type]}"></i>
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      
+      const icon = {
+        success: 'fas fa-check-circle',
+        warning: 'fas fa-exclamation-triangle',
+        error: 'fas fa-times-circle',
+        info: 'fas fa-info-circle'
+      }[type] || 'fas fa-info-circle';
+
+      alert.innerHTML = `
+        <i class="${icon}"></i>
         <span>${message}</span>
-        <button class="btn" style="margin-left: auto; padding: 4px 8px; font-size: 0.7rem;" onclick="this.parentElement.remove()">
-          <i class="fas fa-times"></i>
-        </button>
       `;
 
-      // Insert after the header
-      const header = alertsPanel.querySelector('.controls-header');
-      header.insertAdjacentElement('afterend', alertDiv);
+      alertsPanel.appendChild(alert);
 
-      // Auto-remove after 5 seconds
+      // Auto-remove after 10 seconds
       setTimeout(() => {
-        if (alertDiv.parentElement) {
-          alertDiv.remove();
+        if (alert.parentNode) {
+          alert.style.opacity = '0';
+          alert.style.transform = 'translateX(-100%)';
+          setTimeout(() => alert.remove(), 300);
         }
-      }, 5000);
+      }, 10000);
+    }
+
+    // Update refresh indicator
+    function updateRefreshIndicator() {
+      const indicator = document.getElementById('refreshIndicator');
+      const spinner = indicator.querySelector('.spinner');
+      const text = indicator.querySelector('span');
+
+      if (dashboardData.isRefreshing) {
+        spinner.style.display = 'block';
+        text.textContent = 'Refreshing data...';
+        indicator.classList.add('active');
+      } else {
+        spinner.style.display = 'none';
+        text.textContent = `Auto-refresh every ${dashboardData.refreshInterval / 1000} seconds`;
+        indicator.classList.remove('active');
+      }
     }
 
     // Start auto-refresh
     function startAutoRefresh() {
-      const intervalInput = document.getElementById('refreshInterval');
-      
       setInterval(() => {
         if (!dashboardData.isRefreshing) {
-          // Simulate small random updates
-          Object.keys(dashboardData.resorts).forEach(resortId => {
-            const resort = dashboardData.resorts[resortId];
+          // Silently refresh data
+          Object.values(dashboardData.resorts).forEach(resort => {
+            const stats = resort.feedbackDB.getStats();
+            const oldTotal = resort.totalRatings;
             
-            // Small chance of getting new ratings
-            if (Math.random() < 0.3) {
-              const newRating = Math.random() < 0.7 ? 'like' : 'dislike';
-              
-              if (newRating === 'like') {
-                resort.likes++;
-              } else {
-                resort.dislikes++;
-              }
-              
-              resort.totalRatings = resort.likes + resort.dislikes;
-              resort.positivePercentage = resort.totalRatings > 0 
-                ? Math.round((resort.likes / resort.totalRatings) * 100) 
-                : 0;
-              resort.lastUpdated = new Date().toISOString();
+            resort.likes = stats.likes;
+            resort.dislikes = stats.dislikes;
+            resort.totalRatings = stats.total;
+            resort.positivePercentage = stats.positivePercentage;
+            resort.lastUpdated = new Date().toISOString();
+            resort.hasData = stats.total > 0;
+
+            // Check for new ratings
+            if (stats.total > oldTotal) {
+              addAlert('info', `New rating received for ${resort.name}!`);
             }
           });
 
           renderResortCards();
           updateOverallStats();
-          dashboardData.lastUpdate = new Date();
+          updateChart();
         }
-      }, parseInt(intervalInput.value) * 1000);
-
-      // Listen for interval changes
-      intervalInput.addEventListener('change', (e) => {
-        const newInterval = parseInt(e.target.value);
-        if (newInterval >= 10 && newInterval <= 300) {
-          dashboardData.refreshInterval = newInterval * 1000;
-          addAlert('info', `Refresh interval updated to ${newInterval} seconds.`);
-        } else {
-          e.target.value = 30;
-          addAlert('warning', 'Invalid interval. Must be between 10-300 seconds.');
-        }
-      });
+      }, dashboardData.refreshInterval);
     }
 
-    // Handle date range changes
-    function handleDateRangeChange() {
-      const dateRange = document.getElementById('dateRange');
-      dateRange.addEventListener('change', (e) => {
-        addAlert('info', `Date range changed to: ${e.target.selectedOptions[0].text}`);
-        // In a real implementation, this would filter the data
-        updateChart();
-      });
-    }
-
-    // Real-time data fetching (for actual implementation)
-    async function fetchResortData(resort) {
-      try {
-        // This would be the actual API call
-        const response = await fetch(resort.apiEndpoint, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // Update resort data with real API response
-        resort.likes = data.likes || 0;
-        resort.dislikes = data.dislikes || 0;
-        resort.totalRatings = resort.likes + resort.dislikes;
-        resort.positivePercentage = resort.totalRatings > 0 
-          ? Math.round((resort.likes / resort.totalRatings) * 100) 
-          : 0;
-        resort.lastUpdated = new Date().toISOString();
-        resort.isOnline = true;
-        resort.responseTime = Date.now() - startTime;
-
-        return data;
-      } catch (error) {
-        console.error(`Error fetching data for ${resort.name}:`, error);
-        resort.isOnline = false;
-        addAlert('error', `Failed to fetch data for ${resort.name}: ${error.message}`);
-        return null;
-      }
-    }
-
-    // Batch fetch all resort data
-    async function fetchAllResortData() {
-      dashboardData.isRefreshing = true;
-      const promises = RESORTS.map(resort => fetchResortData(dashboardData.resorts[resort.id]));
-      
-      try {
-        await Promise.all(promises);
-        renderResortCards();
-        updateOverallStats();
-        updateChart();
-        addAlert('success', 'All resort data updated successfully.');
-      } catch (error) {
-        addAlert('error', 'Some resorts failed to update. Check individual resort status.');
-      } finally {
-        dashboardData.isRefreshing = false;
-      }
-    }
-
-    // Monitor resort website availability
-    async function checkResortAvailability(resort) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-        const response = await fetch(resort.url, {
-          method: 'HEAD',
-          signal: controller.signal,
-          mode: 'no-cors' // For cross-origin requests
-        });
-
-        clearTimeout(timeoutId);
-        resort.isOnline = true;
-        resort.responseTime = Date.now() - startTime;
-      } catch (error) {
-        resort.isOnline = false;
-        resort.responseTime = null;
-        console.warn(`${resort.name} appears to be offline:`, error.message);
-      }
-    }
-
-    // Keyboard shortcuts
-    function setupKeyboardShortcuts() {
-      document.addEventListener('keydown', (e) => {
-        // Ctrl/Cmd + R: Refresh all data
-        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-          e.preventDefault();
-          refreshAllData();
-        }
-        
-        // Ctrl/Cmd + E: Export data
-        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-          e.preventDefault();
-          exportAllData();
-        }
-        
-        // Esc: Clear all alerts
-        if (e.key === 'Escape') {
-          const alerts = document.querySelectorAll('.alert');
-          alerts.forEach(alert => alert.remove());
-        }
-      });
-    }
-
-    // Performance monitoring
-    function trackPerformance() {
-      const performanceData = {
-        loadTime: performance.now(),
-        memory: navigator.deviceMemory || 'unknown',
-        connection: navigator.connection?.effectiveType || 'unknown',
-        resorts: Object.keys(dashboardData.resorts).length,
-        lastUpdate: dashboardData.lastUpdate
-      };
-
-      console.log('Dashboard Performance:', performanceData);
-      
-      // Monitor for performance issues
-      if (performanceData.loadTime > 3000) {
-        addAlert('warning', 'Dashboard is loading slowly. Consider reducing refresh frequency.');
-      }
-    }
-
-    // Error handling and recovery
-    function setupErrorHandling() {
-      window.addEventListener('error', (e) => {
-        console.error('Dashboard Error:', e.error);
-        addAlert('error', 'An unexpected error occurred. Dashboard may not function properly.');
-      });
-
-      window.addEventListener('unhandledrejection', (e) => {
-        console.error('Unhandled Promise Rejection:', e.reason);
-        addAlert('error', 'A network request failed. Some data may be outdated.');
-      });
-    }
-
-    // Initialize theme switching (bonus feature)
-    function initializeThemeToggle() {
-      const themeToggle = document.createElement('button');
-      themeToggle.className = 'btn btn-outline';
-      themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
-      themeToggle.style.position = 'fixed';
-      themeToggle.style.top = '20px';
-      themeToggle.style.right = '20px';
-      themeToggle.style.zIndex = '1000';
-
-      themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-theme');
-        const isDark = document.body.classList.contains('dark-theme');
-        themeToggle.innerHTML = isDark 
-          ? '<i class="fas fa-sun"></i> Light Mode'
-          : '<i class="fas fa-moon"></i> Dark Mode';
-      });
-
-      document.body.appendChild(themeToggle);
-    }
-
-    // Main initialization
-    document.addEventListener('DOMContentLoaded', () => {
-      try {
-        initializeDashboard();
-        handleDateRangeChange();
-        setupKeyboardShortcuts();
-        setupErrorHandling();
-        initializeThemeToggle();
-        trackPerformance();
-        
-        console.log('Resort Rating Monitoring Dashboard initialized successfully!');
-        console.log('Keyboard shortcuts:');
-        console.log('- Ctrl/Cmd + R: Refresh all data');
-        console.log('- Ctrl/Cmd + E: Export data');
-        console.log('- Esc: Clear all alerts');
-        
-      } catch (error) {
-        console.error('Failed to initialize dashboard:', error);
-        addAlert('error', 'Failed to initialize dashboard. Please refresh the page.');
+    // Handle refresh interval change
+    document.getElementById('refreshInterval').addEventListener('change', function() {
+      const newInterval = parseInt(this.value) * 1000;
+      if (newInterval >= 10000 && newInterval <= 300000) {
+        dashboardData.refreshInterval = newInterval;
+        updateRefreshIndicator();
+        addAlert('info', `Refresh interval updated to ${this.value} seconds.`);
+      } else {
+        this.value = dashboardData.refreshInterval / 1000;
+        addAlert('warning', 'Refresh interval must be between 10 and 300 seconds.');
       }
     });
 
-    // Expose global functions for debugging
+    // Handle date range change
+    document.getElementById('dateRange').addEventListener('change', function() {
+      addAlert('info', `Date range filter changed to: ${this.options[this.selectedIndex].text}`);
+      // Here you could implement actual date filtering if needed
+      updateChart();
+    });
+
+    // Simulate real-time updates (for demo purposes)
+    function simulateRealtimeUpdates() {
+      setInterval(() => {
+        // Randomly add a rating to a random resort (very low probability)
+        if (Math.random() < 0.02) { // 2% chance every 5 seconds
+          const resortIds = Object.keys(dashboardData.resorts);
+          const randomResortId = resortIds[Math.floor(Math.random() * resortIds.length)];
+          const resort = dashboardData.resorts[randomResortId];
+          
+          // Simulate adding a like or dislike
+          const isLike = Math.random() > 0.3; // 70% chance of like
+          const data = resort.feedbackDB.getData();
+          
+          if (isLike) {
+            data.stats.likes++;
+          } else {
+            data.stats.dislikes++;
+          }
+          
+          data.lastUpdated = new Date().toISOString();
+          resort.feedbackDB.saveData(data);
+          
+          // Don't refresh UI here - let the auto-refresh handle it
+        }
+      }, 5000);
+    }
+
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeDashboard();
+      
+      // Start simulated updates (comment out for production)
+      // simulateRealtimeUpdates();
+      
+      console.log('Resort Rating Monitoring Dashboard initialized successfully!');
+      console.log('Connected to local feedback databases for real-time monitoring.');
+    });
+
+    // Handle keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey || e.metaKey) {
+        switch(e.key) {
+          case 'r':
+            e.preventDefault();
+            refreshAllData();
+            break;
+          case 'e':
+            e.preventDefault();
+            exportAllData();
+            break;
+        }
+      }
+    });
+
+    // Handle visibility change (pause/resume when tab is not visible)
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Optionally pause auto-refresh when tab is not visible
+      } else {
+        // Resume and do a quick refresh
+        if (!dashboardData.isRefreshing) {
+          refreshAllData();
+        }
+      }
+    });
+
+    // Add some utility functions for external use
     window.dashboardAPI = {
-      refreshAllData,
-      exportAllData,
-      resetResortData,
-      fetchAllResortData,
-      getDashboardData: () => dashboardData,
-      addAlert
+      getResortData: (resortId) => dashboardData.resorts[resortId],
+      getAllData: () => dashboardData,
+      refreshResort: refreshResortData,
+      refreshAll: refreshAllData,
+      exportData: exportAllData,
+      addCustomAlert: addAlert
     };
   </script>
 </body>
