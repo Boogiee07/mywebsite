@@ -7,7 +7,7 @@
         facilities: "Swimming pools, Hot spring baths, Cottages, Function halls, Restaurant, Parking",
         lat: 14.179855690866304,
         lng: 121.1837820447193,
-        website: "/resorts/1_resort.html",
+        website: "/resorts1/1_resort.html",
         // Search criteria
         bedrooms: 3,
         price: "mid", // ₱7,500 per night
@@ -21,7 +21,7 @@
         facilities: "Private pools, Event space, Kitchen facilities, Barbecue area, Air-conditioned rooms",
         lat: 14.179350807676604,
         lng: 121.18485773727306,
-        website: "/resorts/2_resort.html",
+        website: "/resorts2/2_resort.html",
         // Search criteria
         bedrooms: 4,
         price: "premium", // ₱12,000 per night
@@ -35,7 +35,7 @@
         facilities: "Hot spring pools, Karaoke, Videoke, Outdoor grilling area, WiFi",
         lat: 14.179889853295485,
         lng: 121.1861350014737,
-        website: "/resorts/3_resort.html",
+        website: "/resorts3/3_resort.html",
         // Search criteria
         bedrooms: 2,
         price: "budget", // ₱4,500 per night
@@ -49,7 +49,7 @@
         facilities: "Heated pools, Spa services, Gazebo, Garden area, Outdoor dining",
         lat: 14.17950049393675,
         lng: 121.18694386655233,
-        website: "/resorts/4_resort.html",
+        website: "/resorts4/4_resort.html",
         // Search criteria
         bedrooms: 5,
         price: "premium", // ₱15,000 per night
@@ -63,7 +63,7 @@
         facilities: "Multiple swimming pools, Function hall, Videoke, Cottages, Playground",
         lat: 14.180012234621406,
         lng: 121.1871543967939,
-        website: "/resorts/5_resort.html",
+        website: "/resorts5/5_resort.html",
         // Search criteria
         bedrooms: 6,
         price: "premium", // ₱18,000 per night
