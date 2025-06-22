@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resort Rating Monitoring Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --dark-color: #34495e;
+      --light-bg: #ecf0f1;
+      --white: #ffffff;
+      --text-dark: #2c3e50;
+      --text-light: #7f8c8d;
+      --border-color: #bdc3c7;
+      --shadow: 0 2px 10px rgba(0,0,0,0.1);
+      --shadow-hover: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: var(--text-dark);
+    }
+
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      background: var(--white);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .header h1 {
+      color: var(--primary-color);
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .header p {
+      color: var(--text-light);
+      font-size: 1.1rem;
+    }
+
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-change {
+      font-size: 0.85rem;
+      margin-top: 8px;
+      padding: 4px 8px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    .stat-change.positive {
+      background: rgba(39, 174, 96, 0.1);
+      color: var(--success-color);
+    }
+
+    .stat-change.negative {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--danger-color);
+    }
+
+    .resorts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .resort-card {
+      background: var(--white);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .resort-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .resort-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--light-bg);
+    }
+
+    .resort-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .resort-status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-online {
+      background: rgba(39, 174, 96, 0.1);
+      color: var(--success-color);
+      border: 1px solid rgba(39, 174, 96, 0.3);
+    }
+
+    .status-offline {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    .resort-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .metric {
+      text-align: center;
+      padding: 15px;
+      background: var(--light-bg);
+      border-radius: 10px;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      text-transform: uppercase;
+    }
+
+    .rating-bar {
+      margin-bottom: 20px;
+    }
+
+    .rating-bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .rating-progress {
+      width: 100%;
+      height: 8px;
+      background: var(--light-bg);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .rating-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--danger-color), var(--warning-color), var(--success-color));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .resort-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--secondary-color);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--secondary-color);
+      border: 2px solid var(--secondary-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--secondary-color);
+      color: var(--white);
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: var(--white);
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .controls-panel {
+      background: var(--white);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .controls-header {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .control-input {
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .control-input:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+    }
+
+    .refresh-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+
+    .refresh-indicator.active {
+      color: var(--success-color);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border-color);
+      border-top: 2px solid var(--secondary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .alerts-panel {
+      background: var(--white);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alert-warning {
+      background: rgba(243, 156, 18, 0.1);
+      border-left: 4px solid var(--warning-color);
+      color: #8a6914;
+    }
+
+    .alert-info {
+      background: rgba(52, 152, 219, 0.1);
+      border-left: 4px solid var(--secondary-color);
+      color: #2471a3;
+    }
+
+    .chart-container {
+      background: var(--white);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-header {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .chart {
+      height: 300px;
+      display: flex;
+      align-items: end;
+      justify-content: space-around;
+      gap: 10px;
+      padding: 20px 0;
+      border-bottom: 2px solid var(--border-color);
+      position: relative;
+    }
+
+    .chart-bar {
+      background: linear-gradient(180deg, var(--secondary-color), var(--primary-color));
+      border-radius: 4px 4px 0 0;
+      min-width: 40px;
+      position: relative;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .chart-bar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .chart-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .chart-value {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-container {
+        padding: 15px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .resorts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .resort-metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .resort-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .resort-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Header -->
+    <div class="header">
+      <h1><i class="fas fa-chart-line"></i> Resort Rating Monitoring Dashboard</h1>
+      <p>Real-time monitoring of all your resort websites</p>
+    </div>
+
+    <!-- Overall Stats -->
+    <div class="stats-overview">
+      <div class="stat-card">
+        <div class="stat-value" id="totalRatings">0</div>
+        <div class="stat-label">Total Ratings</div>
+        <div class="stat-change positive" id="ratingsChange">+0 today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="averageRating">0%</div>
+        <div class="stat-label">Average Positive Rating</div>
+        <div class="stat-change" id="ratingChange">No change</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="activeResorts">0</div>
+        <div class="stat-label">Active Resorts</div>
+        <div class="stat-change positive">All online</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="lastUpdate">--:--</div>
+        <div class="stat-label">Last Updated</div>
+        <div class="stat-change" id="updateStatus">Auto-refresh ON</div>
+      </div>
+    </div>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+      <div class="controls-header">
+        <i class="fas fa-cogs"></i> Dashboard Controls
+      </div>
+      <div class="refresh-indicator" id="refreshIndicator">
+        <div class="spinner" style="display: none;"></div>
+        <span>Auto-refresh every 30 seconds</span>
+      </div>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label class="control-label">Refresh Interval (seconds)</label>
+          <input type="number" class="control-input" id="refreshInterval" value="30" min="10" max="300">
+        </div>
+        <div class="control-group">
+          <label class="control-label">Date Range</label>
+          <select class="control-input" id="dateRange">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Actions</label>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="refreshAllData()">
+              <i class="fas fa-sync"></i> Refresh Now
+            </button>
+            <button class="btn btn-outline" onclick="exportAllData()">
+              <i class="fas fa-download"></i> Export
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts Panel -->
+    <div class="alerts-panel" id="alertsPanel">
+      <div class="controls-header">
+        <i class="fas fa-bell"></i> System Alerts
+      </div>
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <span>Dashboard initialized successfully. Monitoring 5 resort websites.</span>
+      </div>
+    </div>
+
+    <!-- Individual Resort Cards -->
+    <div class="resorts-grid" id="resortsGrid">
+      <!-- Resort cards will be dynamically generated here -->
+    </div>
+
+    <!-- Analytics Chart -->
+    <div class="chart-container">
+      <div class="chart-header">
+        <i class="fas fa-chart-bar"></i> Weekly Rating Trends
+      </div>
+      <div class="chart" id="ratingsChart">
+        <!-- Chart bars will be dynamically generated here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Resort Configuration
+    const RESORTS = [
+      {
+        id: 'laguna-hot-spring',
+        name: 'Laguna Hot Spring Resort',
+        url: 'RESORTS/1_resort.html',
+        location: 'Calamba, Laguna',
+        apiEndpoint: 'https://pansolmap.netlify.app/resorts/1_resort.html'
+      },
+      {
+        id: 'mountain-view-resort',
+        name: 'Mountain View Resort',
+        url: 'https://your-domain.com/mountain-view.html',
+        location: 'Tagaytay, Cavite',
+        apiEndpoint: 'https://your-domain.com/api/feedback/mountain-view'
+      },
+      {
+        id: 'beach-paradise',
+        name: 'Beach Paradise Resort',
+        url: 'https://your-domain.com/beach-paradise.html',
+        location: 'Batangas',
+        apiEndpoint: 'https://your-domain.com/api/feedback/beach-paradise'
+      },
+      {
+        id: 'forest-retreat',
+        name: 'Forest Retreat Resort',
+        url: 'https://your-domain.com/forest-retreat.html',
+        location: 'Rizal',
+        apiEndpoint: 'https://your-domain.com/api/feedback/forest-retreat'
+      },
+      {
+        id: 'lakeside-haven',
+        name: 'Lakeside Haven Resort',
+        url: 'https://your-domain.com/lakeside-haven.html',
+        location: 'Laguna de Bay',
+        apiEndpoint: 'https://your-domain.com/api/feedback/lakeside-haven'
+      }
+    ];
+
+    // Dashboard State
+    let dashboardData = {
+      resorts: {},
+      lastUpdate: null,
+      refreshInterval: 30000,
+      isRefreshing: false
+    };
+
+    // Initialize dashboard
+    function initializeDashboard() {
+      // Initialize resort data with demo data
+      RESORTS.forEach(resort => {
+        dashboardData.resorts[resort.id] = {
+          ...resort,
+          status: 'online',
+          likes: Math.floor(Math.random() * 100) + 50,
+          dislikes: Math.floor(Math.random() * 30) + 5,
+          totalRatings: 0,
+          positivePercentage: 0,
+          lastUpdated: new Date().toISOString(),
+          isOnline: true,
+          responseTime: Math.floor(Math.random() * 500) + 100
+        };
+        
+        // Calculate metrics
+        const resort_data = dashboardData.resorts[resort.id];
+        resort_data.totalRatings = resort_data.likes + resort_data.dislikes;
+        resort_data.positivePercentage = resort_data.totalRatings > 0 
+          ? Math.round((resort_data.likes / resort_data.totalRatings) * 100) 
+          : 0;
+      });
+
+      renderResortCards();
+      updateOverallStats();
+      updateChart();
+      startAutoRefresh();
+      
+      console.log('Dashboard initialized with demo data');
+      addAlert('success', 'Dashboard initialized successfully with demo data.');
+    }
+
+    // Render resort cards
+    function renderResortCards() {
+      const grid = document.getElementById('resortsGrid');
+      grid.innerHTML = '';
+
+      Object.values(dashboardData.resorts).forEach(resort => {
+        const card = createResortCard(resort);
+        grid.appendChild(card);
+      });
+    }
+
+    // Create individual resort card
+    function createResortCard(resort) {
+      const card = document.createElement('div');
+      card.className = 'resort-card';
+      
+      const statusClass = resort.isOnline ? 'status-online' : 'status-offline';
+      const statusText = resort.isOnline ? 'Online' : 'Offline';
+      
+      card.innerHTML = `
+        <div class="resort-header">
+          <div>
+            <div class="resort-name">${resort.name}</div>
+            <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 4px;">
+              <i class="fas fa-map-marker-alt"></i> ${resort.location}
+            </div>
+          </div>
+          <div class="resort-status ${statusClass}">
+            <i class="fas fa-circle"></i> ${statusText}
+          </div>
+        </div>
+
+        <div class="resort-metrics">
+          <div class="metric">
+            <div class="metric-value" style="color: var(--success-color);">${resort.likes}</div>
+            <div class="metric-label">Likes</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color: var(--danger-color);">${resort.dislikes}</div>
+            <div class="metric-label">Dislikes</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color: var(--secondary-color);">${resort.totalRatings}</div>
+            <div class="metric-label">Total</div>
+          </div>
+        </div>
+
+        <div class="rating-bar">
+          <div class="rating-bar-label">
+            <span>Positive Rating</span>
+            <span><strong>${resort.positivePercentage}%</strong></span>
+          </div>
+          <div class="rating-progress">
+            <div class="rating-fill" style="width: ${resort.positivePercentage}%"></div>
+          </div>
+        </div>
+
+        <div class="resort-actions">
+          <a href="${resort.url}" target="_blank" class="btn btn-primary">
+            <i class="fas fa-external-link-alt"></i> View Site
+          </a>
+          <button class="btn btn-outline" onclick="refreshResortData('${resort.id}')">
+            <i class="fas fa-sync"></i> Refresh
+          </button>
+          <button class="btn btn-danger" onclick="resetResortData('${resort.id}')">
+            <i class="fas fa-trash"></i> Reset
+          </button>
+        </div>
+
+        <div style="margin-top: 15px; font-size: 0.8rem; color: var(--text-light);">
+          <i class="fas fa-clock"></i> Last updated: ${new Date(resort.lastUpdated).toLocaleTimeString()}
+        </div>
+      `;
+
+      return card;
+    }
+
+    // Update overall statistics
+    function updateOverallStats() {
+      const resorts = Object.values(dashboardData.resorts);
+      
+      const totalLikes = resorts.reduce((sum, r) => sum + r.likes, 0);
+      const totalDislikes = resorts.reduce((sum, r) => sum + r.dislikes, 0);
+      const totalRatings = totalLikes + totalDislikes;
+      const averagePositive = totalRatings > 0 ? Math.round((totalLikes / totalRatings) * 100) : 0;
+      const activeResorts = resorts.filter(r => r.isOnline).length;
+
+      document.getElementById('totalRatings').textContent = totalRatings;
+      document.getElementById('averageRating').textContent = averagePositive + '%';
+      document.getElementById('activeResorts').textContent = activeResorts;
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+      // Update change indicators
+      const ratingChangeEl = document.getElementById('ratingChange');
+      if (averagePositive >= 70) {
+        ratingChangeEl.textContent = 'Excellent';
+        ratingChangeEl.className = 'stat-change positive';
+      } else if (averagePositive >= 50) {
+        ratingChangeEl.textContent = 'Good';
+        ratingChangeEl.className = 'stat-change';
+      } else {
+        ratingChangeEl.textContent = 'Needs attention';
+        ratingChangeEl.className = 'stat-change negative';
+      }
+    }
+
+    // Update analytics chart
+    function updateChart() {
+      const chart = document.getElementById('ratingsChart');
+      chart.innerHTML = '';
+
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const maxHeight = 250;
+
+      days.forEach((day, index) => {
+        const value = Math.floor(Math.random() * 100) + 20;
+        const height = (value / 120) * maxHeight;
+
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar';
+        bar.style.height = height + 'px';
+        bar.innerHTML = `
+          <div class="chart-value">${value}</div>
+          <div class="chart-label">${day}</div>
+        `;
+        
+        chart.appendChild(bar);
+      });
+    }
+
+    // Refresh individual resort data
+    function refreshResortData(resortId) {
+      const resort = dashboardData.resorts[resortId];
+      if (!resort) return;
+
+      addAlert('info', `Refreshing data for ${resort.name}...`);
+
+      // Simulate API call with random data updates
+      setTimeout(() => {
+        const likesChange = Math.floor(Math.random() * 10) - 2;
+        const dislikesChange = Math.floor(Math.random() * 5) - 1;
+
+        resort.likes = Math.max(0, resort.likes + likesChange);
+        resort.dislikes = Math.max(0, resort.dislikes + dislikesChange);
+        resort.totalRatings = resort.likes + resort.dislikes;
+        resort.positivePercentage = resort.totalRatings > 0 
+          ? Math.round((resort.likes / resort.totalRatings) * 100) 
+          : 0;
+        resort.lastUpdated = new Date().toISOString();
+
+        renderResortCards();
+        updateOverallStats();
+        
+        addAlert('success', `${resort.name} data refreshed successfully.`);
+      }, 1000);
+    }
+
+    // Refresh all resort data
+    function refreshAllData() {
+      if (dashboardData.isRefreshing) return;
+
+      dashboardData.isRefreshing = true;
+      const indicator = document.getElementById('refreshIndicator');
+      const spinner = indicator.querySelector('.spinner');
+      
+      indicator.classList.add('active');
+      spinner.style.display = 'block';
+      indicator.querySelector('span').textContent = 'Refreshing all data...';
+
+      addAlert('info', 'Refreshing data for all resorts...');
+
+      // Simulate API calls for all resorts
+      setTimeout(() => {
+        Object.keys(dashboardData.resorts).forEach(resortId => {
+          const resort = dashboardData.resorts[resortId];
+          const likesChange = Math.floor(Math.random() * 8) - 2;
+          const dislikesChange = Math.floor(Math.random() * 4) - 1;
+
+          resort.likes = Math.max(0, resort.likes + likesChange);
+          resort.dislikes = Math.max(0, resort.dislikes + dislikesChange);
+          resort.totalRatings = resort.likes + resort.dislikes;
+          resort.positivePercentage = resort.totalRatings > 0 
+            ? Math.round((resort.likes / resort.totalRatings) * 100) 
+            : 0;
+          resort.lastUpdated = new Date().toISOString();
+          resort.isOnline = Math.random() > 0.1; // 90% uptime simulation
+        });
+
+        renderResortCards();
+        updateOverallStats();
+        updateChart();
+
+        dashboardData.isRefreshing = false;
+        indicator.classList.remove('active');
+        spinner.style.display = 'none';
+        indicator.querySelector('span').textContent = 'Auto-refresh every 30 seconds';
+
+        addAlert('success', 'All resort data refreshed successfully.');
+      }, 2000);
+    }
+
+    // Reset resort data
+    function resetResortData(resortId) {
+      if (!confirm('Are you sure you want to reset all feedback data for this resort?')) {
+        return;
+      }
+
+      const resort = dashboardData.resorts[resortId];
+      resort.likes = 0;
+      resort.dislikes = 0;
+      resort.totalRatings = 0;
+      resort.positivePercentage = 0;
+      resort.lastUpdated = new Date().toISOString();
+
+      renderResortCards();
+      updateOverallStats();
+      
+      addAlert('warning', `${resort.name} feedback data has been reset.`);
+    }
+
+    // Export all data
+    function exportAllData() {
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        summary: {
+          totalRatings: Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.totalRatings, 0),
+          totalLikes: Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.likes, 0),
+          totalDislikes: Object.values(dashboardData.resorts).reduce((sum, r) => sum + r.dislikes, 0),
+          activeResorts: Object.values(dashboardData.resorts).filter(r => r.isOnline).length
+        },
+        resorts: dashboardData.resorts
+      };
+
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `resort-ratings-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      URL.revokeObjectURL(url);
+      addAlert('success', 'Data exported successfully.');
+    }
+
+    // Add alert to alerts panel
+    function addAlert(type, message) {
+      const alertsPanel = document.getElementById('alertsPanel');
+      const alertDiv = document.createElement('div');
+      
+      const iconMap = {
+        success: 'fa-check-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle',
+        error: 'fa-times-circle'
+      };
+
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.innerHTML = `
+        <i class="fas ${iconMap[type]}"></i>
+        <span>${message}</span>
+        <button class="btn" style="margin-left: auto; padding: 4px 8px; font-size: 0.7rem;" onclick="this.parentElement.remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+
+      // Insert after the header
+      const header = alertsPanel.querySelector('.controls-header');
+      header.insertAdjacentElement('afterend', alertDiv);
+
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (alertDiv.parentElement) {
+          alertDiv.remove();
+        }
+      }, 5000);
+    }
+
+    // Start auto-refresh
+    function startAutoRefresh() {
+      const intervalInput = document.getElementById('refreshInterval');
+      
+      setInterval(() => {
+        if (!dashboardData.isRefreshing) {
+          // Simulate small random updates
+          Object.keys(dashboardData.resorts).forEach(resortId => {
+            const resort = dashboardData.resorts[resortId];
+            
+            // Small chance of getting new ratings
+            if (Math.random() < 0.3) {
+              const newRating = Math.random() < 0.7 ? 'like' : 'dislike';
+              
+              if (newRating === 'like') {
+                resort.likes++;
+              } else {
+                resort.dislikes++;
+              }
+              
+              resort.totalRatings = resort.likes + resort.dislikes;
+              resort.positivePercentage = resort.totalRatings > 0 
+                ? Math.round((resort.likes / resort.totalRatings) * 100) 
+                : 0;
+              resort.lastUpdated = new Date().toISOString();
+            }
+          });
+
+          renderResortCards();
+          updateOverallStats();
+          dashboardData.lastUpdate = new Date();
+        }
+      }, parseInt(intervalInput.value) * 1000);
+
+      // Listen for interval changes
+      intervalInput.addEventListener('change', (e) => {
+        const newInterval = parseInt(e.target.value);
+        if (newInterval >= 10 && newInterval <= 300) {
+          dashboardData.refreshInterval = newInterval * 1000;
+          addAlert('info', `Refresh interval updated to ${newInterval} seconds.`);
+        } else {
+          e.target.value = 30;
+          addAlert('warning', 'Invalid interval. Must be between 10-300 seconds.');
+        }
+      });
+    }
+
+    // Handle date range changes
+    function handleDateRangeChange() {
+      const dateRange = document.getElementById('dateRange');
+      dateRange.addEventListener('change', (e) => {
+        addAlert('info', `Date range changed to: ${e.target.selectedOptions[0].text}`);
+        // In a real implementation, this would filter the data
+        updateChart();
+      });
+    }
+
+    // Real-time data fetching (for actual implementation)
+    async function fetchResortData(resort) {
+      try {
+        // This would be the actual API call
+        const response = await fetch(resort.apiEndpoint, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Update resort data with real API response
+        resort.likes = data.likes || 0;
+        resort.dislikes = data.dislikes || 0;
+        resort.totalRatings = resort.likes + resort.dislikes;
+        resort.positivePercentage = resort.totalRatings > 0 
+          ? Math.round((resort.likes / resort.totalRatings) * 100) 
+          : 0;
+        resort.lastUpdated = new Date().toISOString();
+        resort.isOnline = true;
+        resort.responseTime = Date.now() - startTime;
+
+        return data;
+      } catch (error) {
+        console.error(`Error fetching data for ${resort.name}:`, error);
+        resort.isOnline = false;
+        addAlert('error', `Failed to fetch data for ${resort.name}: ${error.message}`);
+        return null;
+      }
+    }
+
+    // Batch fetch all resort data
+    async function fetchAllResortData() {
+      dashboardData.isRefreshing = true;
+      const promises = RESORTS.map(resort => fetchResortData(dashboardData.resorts[resort.id]));
+      
+      try {
+        await Promise.all(promises);
+        renderResortCards();
+        updateOverallStats();
+        updateChart();
+        addAlert('success', 'All resort data updated successfully.');
+      } catch (error) {
+        addAlert('error', 'Some resorts failed to update. Check individual resort status.');
+      } finally {
+        dashboardData.isRefreshing = false;
+      }
+    }
+
+    // Monitor resort website availability
+    async function checkResortAvailability(resort) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const response = await fetch(resort.url, {
+          method: 'HEAD',
+          signal: controller.signal,
+          mode: 'no-cors' // For cross-origin requests
+        });
+
+        clearTimeout(timeoutId);
+        resort.isOnline = true;
+        resort.responseTime = Date.now() - startTime;
+      } catch (error) {
+        resort.isOnline = false;
+        resort.responseTime = null;
+        console.warn(`${resort.name} appears to be offline:`, error.message);
+      }
+    }
+
+    // Keyboard shortcuts
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + R: Refresh all data
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+          e.preventDefault();
+          refreshAllData();
+        }
+        
+        // Ctrl/Cmd + E: Export data
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+          e.preventDefault();
+          exportAllData();
+        }
+        
+        // Esc: Clear all alerts
+        if (e.key === 'Escape') {
+          const alerts = document.querySelectorAll('.alert');
+          alerts.forEach(alert => alert.remove());
+        }
+      });
+    }
+
+    // Performance monitoring
+    function trackPerformance() {
+      const performanceData = {
+        loadTime: performance.now(),
+        memory: navigator.deviceMemory || 'unknown',
+        connection: navigator.connection?.effectiveType || 'unknown',
+        resorts: Object.keys(dashboardData.resorts).length,
+        lastUpdate: dashboardData.lastUpdate
+      };
+
+      console.log('Dashboard Performance:', performanceData);
+      
+      // Monitor for performance issues
+      if (performanceData.loadTime > 3000) {
+        addAlert('warning', 'Dashboard is loading slowly. Consider reducing refresh frequency.');
+      }
+    }
+
+    // Error handling and recovery
+    function setupErrorHandling() {
+      window.addEventListener('error', (e) => {
+        console.error('Dashboard Error:', e.error);
+        addAlert('error', 'An unexpected error occurred. Dashboard may not function properly.');
+      });
+
+      window.addEventListener('unhandledrejection', (e) => {
+        console.error('Unhandled Promise Rejection:', e.reason);
+        addAlert('error', 'A network request failed. Some data may be outdated.');
+      });
+    }
+
+    // Initialize theme switching (bonus feature)
+    function initializeThemeToggle() {
+      const themeToggle = document.createElement('button');
+      themeToggle.className = 'btn btn-outline';
+      themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+      themeToggle.style.position = 'fixed';
+      themeToggle.style.top = '20px';
+      themeToggle.style.right = '20px';
+      themeToggle.style.zIndex = '1000';
+
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        themeToggle.innerHTML = isDark 
+          ? '<i class="fas fa-sun"></i> Light Mode'
+          : '<i class="fas fa-moon"></i> Dark Mode';
+      });
+
+      document.body.appendChild(themeToggle);
+    }
+
+    // Main initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        initializeDashboard();
+        handleDateRangeChange();
+        setupKeyboardShortcuts();
+        setupErrorHandling();
+        initializeThemeToggle();
+        trackPerformance();
+        
+        console.log('Resort Rating Monitoring Dashboard initialized successfully!');
+        console.log('Keyboard shortcuts:');
+        console.log('- Ctrl/Cmd + R: Refresh all data');
+        console.log('- Ctrl/Cmd + E: Export data');
+        console.log('- Esc: Clear all alerts');
+        
+      } catch (error) {
+        console.error('Failed to initialize dashboard:', error);
+        addAlert('error', 'Failed to initialize dashboard. Please refresh the page.');
+      }
+    });
+
+    // Expose global functions for debugging
+    window.dashboardAPI = {
+      refreshAllData,
+      exportAllData,
+      resetResortData,
+      fetchAllResortData,
+      getDashboardData: () => dashboardData,
+      addAlert
+    };
+  </script>
+</body>
+</html>
