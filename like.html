@@ -746,7 +746,8 @@
           
           <label>
             Your message:
-            <textarea name="message" placeholder="Tell us more about your experience..." required></textarea>
+            <textarea name="message" placeholder="Tell us more about your experience..." required oninput="ensureLagunaPrefix(this)">LAGUNA - </textarea>
+            </label>
           </label>
           
           <button type="submit">Send Feedback</button>
