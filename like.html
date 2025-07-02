@@ -791,6 +791,7 @@
                     this.setSelectionRange(prefix.length, prefix.length);
                 }
             });
+
     let likesCount = 0;
     let dislikesCount = 0;
     let userRating = null;
@@ -831,6 +832,206 @@
     function toggleFeedback() {
       const feedbackSystem = document.getElementById('feedbackSystem');
       feedbackSystem.classList.toggle('collapsed');
+    }
+    class FeedbackDatabase {
+      constructor() {
+        this.dbKey = 'villa_mejia_feedback';
+        this.init();
+      }
+
+      init() {
+        if (!localStorage.getItem(this.dbKey)) {
+          this.resetData();
+        }
+      }
+
+      getData() {
+        return JSON.parse(localStorage.getItem(this.dbKey));
+      }
+
+      saveData(data) {
+        localStorage.setItem(this.dbKey, JSON.stringify(data));
+      }
+
+      addFeedback(type, userIP = null) {
+        const data = this.getData();
+        const timestamp = new Date().toISOString();
+        const feedback = {
+          type: type,
+          timestamp: timestamp,
+          userIP: userIP || this.generateUserID(),
+          id: Date.now()
+        };
+
+        data.feedback.push(feedback);
+        data.stats[type]++;
+        data.lastUpdated = timestamp;
+
+        this.saveData(data);
+        return data;
+      }
+
+      removeFeedback(type) {
+        const data = this.getData();
+        if (data.stats[type] > 0) {
+          data.stats[type]--;
+          // Remove the most recent feedback of this type
+          for (let i = data.feedback.length - 1; i >= 0; i--) {
+            if (data.feedback[i].type === type) {
+              data.feedback.splice(i, 1);
+              break;
+            }
+          }
+          data.lastUpdated = new Date().toISOString();
+          this.saveData(data);
+        }
+        return data;
+      }
+
+      getStats() {
+        const data = this.getData();
+        const total = data.stats.likes + data.stats.dislikes;
+        const positivePercentage = total > 0 ? Math.round((data.stats.likes / total) * 100) : 0;
+        
+        return {
+          likes: data.stats.likes,
+          dislikes: data.stats.dislikes,
+          total: total,
+          positivePercentage: positivePercentage,
+          lastUpdated: data.lastUpdated
+        };
+      }
+
+      resetData() {
+        const initialData = {
+          stats: {
+            likes: 0,
+            dislikes: 0
+          },
+          feedback: [],
+          created: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        };
+        this.saveData(initialData);
+        return initialData;
+      }
+
+      exportData() {
+        const data = this.getData();
+        const stats = this.getStats();
+        
+        const exportData = {
+          summary: stats,
+          detailedFeedback: data.feedback,
+          exportDate: new Date().toISOString()
+        };
+
+        return exportData;
+      }
+
+      generateUserID() {
+        return 'user_2' + Math.random().toString(36).substr(2, 9);
+      }
+    }
+
+    // Initialize feedback system
+    const feedbackDB = new FeedbackDatabase();
+    let userFeedback = null;
+    let isAdminPanelOpen = false;
+
+    function updateFeedbackDisplay() {
+      const stats = feedbackDB.getStats();
+      
+      // Update compact display
+      document.getElementById('likesCount').textContent = stats.likes;
+      document.getElementById('dislikesCount').textContent = stats.dislikes;
+      
+      // Update admin panel
+      document.getElementById('adminLikes').textContent = stats.likes;
+      document.getElementById('adminDislikes').textContent = stats.dislikes;
+      document.getElementById('adminRating').textContent = stats.positivePercentage + '%';
+      
+      // Show/hide feedback counts based on stats
+      const feedbackSystem = document.getElementById('feedbackSystem');
+      if (stats.total > 0) {
+        feedbackSystem.classList.add('show-stats');
+      } else {
+        feedbackSystem.classList.remove('show-stats');
+      }
+    }
+
+    function giveFeedback(type) {
+      const likeBtn = document.querySelector('.feedback-btn.like');
+      const dislikeBtn = document.querySelector('.feedback-btn.dislike');
+      
+      // If user already gave feedback, remove it first
+      if (userFeedback) {
+        if (userFeedback === type) {
+          // User clicked same button - remove feedback
+          feedbackDB.removeFeedback(type);
+          userFeedback = null;
+          likeBtn.classList.remove('selected');
+          dislikeBtn.classList.remove('selected');
+        } else {
+          // User changed feedback
+          feedbackDB.removeFeedback(userFeedback);
+          feedbackDB.addFeedback(type);
+          userFeedback = type;
+          likeBtn.classList.toggle('selected', type === 'likes');
+          dislikeBtn.classList.toggle('selected', type === 'dislikes');
+        }
+      } else {
+        // New feedback
+        feedbackDB.addFeedback(type);
+        userFeedback = type;
+        likeBtn.classList.toggle('selected', type === 'likes');
+        dislikeBtn.classList.toggle('selected', type === 'dislikes');
+      }
+
+      updateFeedbackDisplay();
+      showThankYouMessage();
+    }
+
+    function showThankYouMessage() {
+      const thankYou = document.getElementById('thankYouMessage');
+      thankYou.classList.add('show');
+      setTimeout(() => {
+        thankYou.classList.remove('show');
+      }, 3000);
+    }
+
+    function toggleAdminPanel() {
+      const panel = document.getElementById('adminPanel');
+      isAdminPanelOpen = !isAdminPanelOpen;
+      panel.classList.toggle('show', isAdminPanelOpen);
+    }
+
+    function resetFeedback() {
+      if (confirm('Are you sure you want to reset all feedback data?')) {
+        feedbackDB.resetData();
+        userFeedback = null;
+        document.querySelector('.feedback-btn.like').classList.remove('selected');
+        document.querySelector('.feedback-btn.dislike').classList.remove('selected');
+        updateFeedbackDisplay();
+        alert('Feedback data has been reset.');
+      }
+    }
+
+    function exportData() {
+      const exportData = feedbackDB.exportData();
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `laguna_resort_feedback_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      alert('Feedback data exported successfully!');
     }
 
     // Carousel functionality
