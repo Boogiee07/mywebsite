@@ -756,6 +756,40 @@
   </div>
 
   <script>
+ const prefix = "LAGUNA - ";
+            
+            function ensureLagunaPrefix(textarea) {
+                if (!textarea.value.startsWith(prefix)) {
+                    const userText = textarea.value.replace(/^LAGUNA - /g, "");
+                    textarea.value = prefix + userText;
+                    textarea.setSelectionRange(prefix.length, prefix.length);
+                }
+            }
+            
+            // Set cursor position after LAGUNA prefix when clicked
+            document.querySelector('textarea').addEventListener('click', function() {
+                if (this.selectionStart < prefix.length) {
+                    this.setSelectionRange(prefix.length, prefix.length);
+                }
+            });
+            
+            // Prevent deleting the LAGUNA prefix and fix backspace issues
+            document.querySelector('textarea').addEventListener('keydown', function(e) {
+                if (this.selectionStart <= prefix.length && (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft')) {
+                    if (e.key === 'Backspace' || e.key === 'Delete') {
+                        e.preventDefault();
+                    }
+                    this.setSelectionRange(prefix.length, prefix.length);
+                }
+            });
+            
+            // Clean up any duplicated LAGUNA text on input
+            document.querySelector('textarea').addEventListener('input', function() {
+                if (this.value.indexOf('LAGUNA - LAGUNA - ') !== -1) {
+                    this.value = this.value.replace(/LAGUNA - LAGUNA - /g, 'LAGUNA - ');
+                    this.setSelectionRange(prefix.length, prefix.length);
+                }
+            });
     let likesCount = 0;
     let dislikesCount = 0;
     let userRating = null;
