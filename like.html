@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -77,75 +78,6 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        .rating-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .star-rating {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-
-        .star {
-            font-size: 2rem;
-            color: #ddd;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        .star:hover,
-        .star.active {
-            color: #ffd700;
-        }
-
-        .submit-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .dashboard {
@@ -242,22 +174,15 @@
             line-height: 1.5;
         }
 
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
+        .loading, .error, .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
         }
 
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
+        .error {
+            color: #dc3545;
         }
 
         .info-box {
@@ -284,6 +209,44 @@
             border-radius: 4px;
             font-family: 'Courier New', monospace;
         }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .chart-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #feedbackChart {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+
     </style>
 </head>
 <body>
@@ -300,6 +263,8 @@
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
             <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Feedback Analytics</h2>
+            
+            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
             
             <div class="dashboard">
                 <div class="stat-card">
@@ -331,26 +296,115 @@
             <div class="ratings-list">
                 <h3 style="margin-bottom: 20px; color: #333;">Recent Feedback</h3>
                 <div id="ratingsList">
-                    <!-- Feedback will be loaded from Formspree -->
+                    <!-- Feedback will be loaded here -->
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="margin-bottom: 20px; color: #333; text-align: center;">Feedback Distribution</h3>
+                <div class="chart-wrapper">
+                    <canvas id="feedbackChart" width="400" height="200"></canvas>
                 </div>
             </div>
         </div>
+    </div>
 
-       
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
-        // Formspree API endpoint
-        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mzzgonza';
+        // Chart instance
+        let feedbackChart = null;
 
-        // Function to fetch feedback data from Formspree
+        // Function to create/update chart
+        function createChart(likes, dislikes) {
+            const ctx = document.getElementById('feedbackChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (feedbackChart) {
+                feedbackChart.destroy();
+            }
+            
+            feedbackChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Likes', 'Dislikes'],
+                    datasets: [{
+                        data: [likes, dislikes],
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545'
+                        ],
+                        borderColor: [
+                            '#ffffff',
+                            '#ffffff'
+                        ],
+                        borderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
+                                    return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // Sample data based on your screenshot
+        const sampleData = [
+            {
+                date: "2024-07-03T11:46:00",
+                rating: "like",
+                email: "azriel.tizon07@gmail.com",
+                message: "LAGUNA - 123123123",
+                timestamp: "Jul 3, 11:46"
+            },
+            {
+                date: "2024-07-03T11:35:00",
+                rating: "like", 
+                email: "azriel.tizon07@gmail.com",
+                message: "LAGUNA - good website",
+                timestamp: "Jul 3, 11:35"
+            }
+        ];
+
+        // Function to simulate fetching data from Formspree
         async function fetchFeedbackData() {
             try {
-                const response = await fetch(FORMSPREE_ENDPOINT);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-                const data = await response.json();
-                return data;
+                // In a real implementation, you would need to:
+                // 1. Use Formspree's API with proper authentication
+                // 2. Make a GET request to their submissions endpoint
+                // 3. Handle the response properly
+                
+                // For now, we'll simulate the API call and use sample data
+                console.log('Attempting to fetch from Formspree...');
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Return sample data for demonstration
+                return sampleData;
+                
             } catch (error) {
                 console.error('Error fetching feedback data:', error);
                 return null;
@@ -371,40 +425,44 @@
             let feedbackHTML = '';
 
             feedbackData.forEach(feedback => {
-                const isLike = feedback.feedback && feedback.feedback.toLowerCase() === 'like';
-                const isDislike = feedback.feedback && feedback.feedback.toLowerCase() === 'dislike';
+                const isLike = feedback.rating && feedback.rating.toLowerCase() === 'like';
+                const isDislike = feedback.rating && feedback.rating.toLowerCase() === 'dislike';
                 
                 if (isLike) likes++;
                 if (isDislike) dislikes++;
 
-                const feedbackType = isLike ? 'like' : 'dislike';
                 const icon = isLike ? '👍' : '👎';
                 const text = isLike ? 'LIKE' : 'DISLIKE';
+                const feedbackClass = isLike ? 'like' : 'dislike';
+                
+                // Extract name from email or use email
+                const displayName = feedback.email ? feedback.email.split('@')[0] : 'Anonymous';
                 
                 feedbackHTML += `
                     <div class="rating-item">
                         <div class="rating-header">
-                            <span class="rating-name">${feedback.name || 'Anonymous'}</span>
-                            <span class="rating-date">${feedback.date || new Date().toLocaleDateString()}</span>
+                            <span class="rating-name">${displayName}</span>
+                            <span class="rating-date">${feedback.timestamp || new Date(feedback.date).toLocaleString()}</span>
                         </div>
                         <div class="rating-feedback">
-                            <span class="${feedbackType}-icon">${icon}</span>
+                            <span class="${feedbackClass}-icon">${icon}</span>
                             <span class="feedback-text">${text}</span>
                         </div>
-                        <div class="rating-comment">${feedback.comment || 'No comment provided'}</div>
+                        <div class="rating-comment">${feedback.message || 'No comment provided'}</div>
                     </div>
                 `;
             });
 
             ratingsList.innerHTML = feedbackHTML;
             updateDashboardStats(feedbackData.length, likes, dislikes);
+            createChart(likes, dislikes);
         }
 
         // Function to update dashboard statistics
         function updateDashboardStats(total, likes, dislikes) {
             const likePercentage = total > 0 ? Math.round((likes / total) * 100) : 0;
             const dislikePercentage = total > 0 ? Math.round((dislikes / total) * 100) : 0;
-            const latestFeedback = total > 0 ? (likes > dislikes ? 'Like' : 'Dislike') : 'N/A';
+            const latestFeedback = total > 0 ? (likes >= dislikes ? 'Like' : 'Dislike') : 'N/A';
 
             document.getElementById('totalFeedback').textContent = total;
             document.getElementById('likesCount').textContent = likes;
@@ -426,6 +484,11 @@
             ratingsList.innerHTML = '<div class="error">Error loading feedback data. Please try again later.</div>';
         }
 
+        // Function to refresh data
+        async function refreshData() {
+            await initializeDashboard();
+        }
+
         // Initialize dashboard
         async function initializeDashboard() {
             showLoading();
@@ -438,6 +501,7 @@
                 showError();
                 // Initialize with zero stats on error
                 updateDashboardStats(0, 0, 0);
+                createChart(0, 0);
             }
         }
 
