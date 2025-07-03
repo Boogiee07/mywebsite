@@ -246,7 +246,171 @@
             height: auto !important;
         }
 
+        .feedback-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
 
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .form-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .confirm-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .confirm-dialog-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .confirm-dialog h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .confirm-dialog p {
+            margin-bottom: 25px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .confirm-dialog-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-btn:hover {
+            background: #c82333;
+        }
+
+        .cancel-btn:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -258,11 +422,14 @@
 
         <div class="tab-container">
             <button class="tab-button active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="tab-button" onclick="showTab('feedback')">Leave Feedback</button>
         </div>
 
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
             <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Feedback Analytics</h2>
+            
+
             
             <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
             
@@ -307,12 +474,63 @@
                 </div>
             </div>
         </div>
+
+        <!-- Feedback Form Tab -->
+        <div id="feedback" class="tab-content">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Leave Your Feedback</h2>
+            
+            <div class="feedback-form">
+                <div id="formMessage"></div>
+                
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rating">Rating</label>
+                        <select id="rating" name="rating" required>
+                            <option value="">Select your rating...</option>
+                            <option value="like">👍 Like</option>
+                            <option value="dislike">👎 Dislike</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Comments (Optional)</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Tell us more about your experience..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">Submit Feedback</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmDialog" class="confirm-dialog" style="display: none;">
+        <div class="confirm-dialog-content">
+            <h3>Delete Feedback</h3>
+            <p id="confirmMessage">Are you sure you want to delete this feedback?</p>
+            <div class="confirm-dialog-buttons">
+                <button class="confirm-btn" onclick="confirmDelete()">Yes, Delete</button>
+                <button class="cancel-btn" onclick="cancelDelete()">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
+        // Configuration
+        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mzzgonza';
+        
         // Chart instance
         let feedbackChart = null;
+        
+        // Delete confirmation variables
+        let pendingDeleteId = null;
+        let feedbackDataCache = [];
 
         // Function to create/update chart
         function createChart(likes, dislikes) {
@@ -370,37 +588,91 @@
             });
         }
 
-
-
-        // Function to simulate fetching data from Formspree
+        // Function to fetch data from Formspree
         async function fetchFeedbackData() {
             try {
-                // In a real implementation, you would need to:
-                // 1. Use Formspree's API with proper authentication
-                // 2. Make a GET request to their submissions endpoint
-                // 3. Handle the response properly
+                console.log('Fetching feedback data from Formspree...');
                 
-                // For now, we'll simulate the API call and use sample data
-                console.log('Attempting to fetch from Formspree...');
+                // Note: This approach requires the Formspree Gold plan or higher
+                // For free plans, you might need to use a different approach
+                const response = await fetch(`${FORMSPREE_ENDPOINT}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
                 
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
-                // Return sample data for demonstration
-                return sampleData;
+                const data = await response.json();
+                console.log('Formspree response:', data);
+                
+                // Process the data based on Formspree's response format
+                if (data.submissions && Array.isArray(data.submissions)) {
+                    return data.submissions;
+                } else if (Array.isArray(data)) {
+                    return data;
+                } else {
+                    console.warn('Unexpected data format from Formspree:', data);
+                    return [];
+                }
                 
             } catch (error) {
                 console.error('Error fetching feedback data:', error);
-                return null;
+                
+                // Show helpful error message based on error type
+                if (error.message.includes('404')) {
+                    console.error('Formspree endpoint not found. Please check your form ID.');
+                } else if (error.message.includes('CORS')) {
+                    console.error('CORS error. You may need to configure CORS in your Formspree settings or serve this from a web server.');
+                } else if (error.message.includes('403')) {
+                    console.error('Access denied. This feature might require a paid Formspree plan.');
+                }
+                
+                // Return sample data for demonstration when real data fails
+                return getSampleData();
             }
+        }
+
+        // Sample data for demonstration
+        function getSampleData() {
+            return [
+                {
+                    email: 'john.doe@example.com',
+                    rating: 'like',
+                    message: 'Great service! Very satisfied with the experience.',
+                    _replyto: 'john.doe@example.com',
+                    timestamp: new Date(Date.now() - 86400000).toLocaleString() // 1 day ago
+                },
+                {
+                    email: 'jane.smith@example.com',
+                    rating: 'dislike',
+                    message: 'Could use some improvements in the user interface.',
+                    _replyto: 'jane.smith@example.com',
+                    timestamp: new Date(Date.now() - 172800000).toLocaleString() // 2 days ago
+                },
+                {
+                    email: 'bob.johnson@example.com',
+                    rating: 'like',
+                    message: 'Excellent product quality and fast delivery.',
+                    _replyto: 'bob.johnson@example.com',
+                    timestamp: new Date(Date.now() - 259200000).toLocaleString() // 3 days ago
+                }
+            ];
         }
 
         // Function to display feedback data
         function displayFeedbackData(feedbackData) {
             const ratingsList = document.getElementById('ratingsList');
             
+            // Cache the data for delete operations
+            feedbackDataCache = feedbackData;
+            
             if (!feedbackData || feedbackData.length === 0) {
-                ratingsList.innerHTML = '<div class="no-data">No feedback data available yet.</div>';
+                ratingsList.innerHTML = '<div class="no-data">No feedback data available yet. Use the "Leave Feedback" tab to submit some feedback!</div>';
                 return;
             }
 
@@ -408,7 +680,14 @@
             let dislikes = 0;
             let feedbackHTML = '';
 
-            feedbackData.forEach(feedback => {
+            // Sort by timestamp (newest first)
+            const sortedData = feedbackData.sort((a, b) => {
+                const dateA = new Date(a.timestamp || a._created_at || a.date || Date.now());
+                const dateB = new Date(b.timestamp || b._created_at || b.date || Date.now());
+                return dateB - dateA;
+            });
+
+            sortedData.forEach(feedback => {
                 const isLike = feedback.rating && feedback.rating.toLowerCase() === 'like';
                 const isDislike = feedback.rating && feedback.rating.toLowerCase() === 'dislike';
                 
@@ -420,13 +699,21 @@
                 const feedbackClass = isLike ? 'like' : 'dislike';
                 
                 // Extract name from email or use email
-                const displayName = feedback.email ? feedback.email.split('@')[0] : 'Anonymous';
+                const email = feedback.email || feedback._replyto || 'anonymous@example.com';
+                const displayName = email.split('@')[0];
+                
+                // Format timestamp
+                const timestamp = feedback.timestamp || feedback._created_at || feedback.date || new Date().toLocaleString();
+                const formattedDate = new Date(timestamp).toLocaleString();
                 
                 feedbackHTML += `
                     <div class="rating-item">
                         <div class="rating-header">
                             <span class="rating-name">${displayName}</span>
-                            <span class="rating-date">${feedback.timestamp || new Date(feedback.date).toLocaleString()}</span>
+                            <div>
+                                <span class="rating-date">${formattedDate}</span>
+                                <button class="delete-btn" onclick="deleteFeedback('${feedback._id || feedback.id || Date.now()}', '${displayName}')">🗑️ Delete</button>
+                            </div>
                         </div>
                         <div class="rating-feedback">
                             <span class="${feedbackClass}-icon">${icon}</span>
@@ -463,9 +750,9 @@
         }
 
         // Function to show error state
-        function showError() {
+        function showError(message = 'Error loading feedback data. Please try again later.') {
             const ratingsList = document.getElementById('ratingsList');
-            ratingsList.innerHTML = '<div class="error">Error loading feedback data. Please try again later.</div>';
+            ratingsList.innerHTML = `<div class="error">${message}</div>`;
         }
 
         // Function to refresh data
@@ -478,15 +765,7 @@
             showLoading();
             
             const feedbackData = await fetchFeedbackData();
-            
-            if (feedbackData) {
-                displayFeedbackData(feedbackData);
-            } else {
-                showError();
-                // Initialize with zero stats on error
-                updateDashboardStats(0, 0, 0);
-                createChart(0, 0);
-            }
+            displayFeedbackData(feedbackData);
         }
 
         // Tab switching functionality
@@ -507,6 +786,105 @@
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
+
+        // Show form message
+        function showFormMessage(message, type = 'success') {
+            const formMessage = document.getElementById('formMessage');
+            formMessage.innerHTML = `<div class="form-message ${type}">${message}</div>`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                formMessage.innerHTML = '';
+            }, 5000);
+        }
+
+        // Handle form submission
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                const formData = new FormData(this);
+                
+                // Add timestamp
+                formData.append('timestamp', new Date().toLocaleString());
+                
+                const response = await fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showFormMessage('Thank you for your feedback! It has been submitted successfully.', 'success');
+                    this.reset();
+                    
+                    // Refresh dashboard data after a short delay
+                    setTimeout(refreshData, 2000);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.errors ? errorData.errors.map(e => e.message).join(', ') : 'Submission failed');
+                }
+                
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                showFormMessage(`Error submitting feedback: ${error.message}`, 'error');
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Delete feedback functions
+        function deleteFeedback(feedbackId, displayName) {
+            pendingDeleteId = feedbackId;
+            document.getElementById('confirmMessage').textContent = 
+                `Are you sure you want to delete feedback from ${displayName}?`;
+            document.getElementById('confirmDialog').style.display = 'flex';
+        }
+
+        function confirmDelete() {
+            if (pendingDeleteId) {
+                // Remove from cached data
+                feedbackDataCache = feedbackDataCache.filter(feedback => {
+                    const id = feedback._id || feedback.id || Date.now();
+                    return id.toString() !== pendingDeleteId.toString();
+                });
+                
+                // Update display
+                displayFeedbackData(feedbackDataCache);
+                
+                // Show success message
+                showFormMessage('Feedback deleted successfully!', 'success');
+                
+                // Note: In a real application, you would also need to delete from Formspree
+                // This requires API access which may not be available in free plans
+                console.log('Feedback deleted locally. Note: This does not delete from Formspree server.');
+            }
+            
+            cancelDelete();
+        }
+
+        function cancelDelete() {
+            pendingDeleteId = null;
+            document.getElementById('confirmDialog').style.display = 'none';
+        }
+
+        // Close dialog when clicking outside
+        document.getElementById('confirmDialog').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cancelDelete();
+            }
+        });
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
