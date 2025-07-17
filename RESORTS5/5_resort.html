@@ -757,7 +757,45 @@
   </div>
 
   <script>
-//dito ako nag tapos     
+    // Feedback Database (using localStorage as simulation)
+    class FeedbackDatabase {
+      constructor() {
+        this.dbKey = 'villa_francesca_feedback';
+        this.init();
+      }
+
+      init() {
+        if (!localStorage.getItem(this.dbKey)) {
+          this.resetData();
+        }
+      }
+
+      getData() {
+        return JSON.parse(localStorage.getItem(this.dbKey));
+      }
+
+      saveData(data) {
+        localStorage.setItem(this.dbKey, JSON.stringify(data));
+      }
+
+      addFeedback(type, userIP = null) {
+        const data = this.getData();
+        const timestamp = new Date().toISOString();
+        const feedback = {
+          type: type,
+          timestamp: timestamp,
+          userIP: userIP || this.generateUserID(),
+          id: Date.now()
+        };
+
+        data.feedback.push(feedback);
+        data.stats[type]++;
+        data.lastUpdated = timestamp;
+
+        this.saveData(data);
+        return data;
+      }
+//dito ako nag tapos    
  const prefix = "VILLA FRANCESCA - ";
             
             function ensureVillaPrefix(textarea) {
