@@ -795,6 +795,69 @@
         this.saveData(data);
         return data;
       }
+
+      removeFeedback(type) {
+        const data = this.getData();
+        if (data.stats[type] > 0) {
+          data.stats[type]--;
+          // Remove the most recent feedback of this type
+          for (let i = data.feedback.length - 1; i >= 0; i--) {
+            if (data.feedback[i].type === type) {
+              data.feedback.splice(i, 1);
+              break;
+            }
+          }
+          data.lastUpdated = new Date().toISOString();
+          this.saveData(data);
+        }
+        return data;
+      }
+
+      getStats() {
+        const data = this.getData();
+        const total = data.stats.likes + data.stats.dislikes;
+        const positivePercentage = total > 0 ? Math.round((data.stats.likes / total) * 100) : 0;
+        
+        return {
+          likes: data.stats.likes,
+          dislikes: data.stats.dislikes,
+          total: total,
+          positivePercentage: positivePercentage,
+          lastUpdated: data.lastUpdated
+        };
+      }
+
+      resetData() {
+        const initialData = {
+          stats: {
+            likes: 0,
+            dislikes: 0
+          },
+          feedback: [],
+          created: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        };
+        this.saveData(initialData);
+        return initialData;
+      }
+
+      exportData() {
+        const data = this.getData();
+        const stats = this.getStats();
+        
+        const exportData = {
+          summary: stats,
+          detailedFeedback: data.feedback,
+          exportDate: new Date().toISOString()
+        };
+
+        return exportData;
+      }
+
+      generateUserID() {
+        return 'user_5' + Math.random().toString(36).substr(2, 9);
+      }
+    }
 //dito ako nag tapos    
  const prefix = "VILLA FRANCESCA - ";
             
