@@ -16,8 +16,8 @@
       --error-color: #ff4444;
       --warning-color: #ff9800;
       --success-color: #4caf50;
-      --like-color: #4caf50;
-      --dislike-color: #f44336;
+      --like-color: #28a745;
+      --dislike-color: #dc3545;
     }
     
     body {
@@ -31,224 +31,201 @@
       overflow-x: hidden;
     }
 
-    /* Compact Feedback System Styles */
+    /* Updated Feedback System Styles */
     .feedback-system {
       position: fixed;
       bottom: 20px;
       right: 20px;
       background: rgba(255,255,255,0.95);
-      border-radius: 50px;
-      padding: 10px 15px;
+      border-radius: 15px;
+      padding: 20px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.3);
       z-index: 1000;
+      max-width: 350px;
+      transition: all 0.3s ease;
+    }
+    
+    .feedback-system.collapsed {
+      max-width: 60px;
+      max-height: 60px;
+      padding: 15px;
+      border-radius: 50%;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 15px;
-      transition: all 0.3s ease;
-      max-width: 200px;
+      justify-content: center;
+      overflow: hidden;
     }
     
-    .feedback-system.expanded {
-      max-width: 300px;
-      padding: 15px 20px;
-      border-radius: 25px;
+    .feedback-toggle {
+      display: none;
+      color: var(--primary-color);
+      font-size: 1.5em;
     }
     
-    .feedback-question {
-      font-size: 0.85em;
-      color: var(--text-color);
-      font-weight: 500;
+    .feedback-system.collapsed .feedback-toggle {
+      display: block;
+    }
+    
+    .feedback-system.collapsed .feedback-content {
       display: none;
     }
     
-    .feedback-system.expanded .feedback-question {
+    .feedback-content {
       display: block;
-      margin-right: 10px;
+    }
+    
+    .feedback-question {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: var(--text-color);
+      font-weight: 600;
+      text-align: center;
     }
     
     .feedback-buttons {
       display: flex;
-      gap: 10px;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
     }
     
     .feedback-btn {
-      background: transparent;
+      background: #fff;
       border: 2px solid #ddd;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
+      border-radius: 50px;
+      padding: 10px 20px;
       cursor: pointer;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.1em;
-      color: #666;
-      position: relative;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 500;
     }
     
     .feedback-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .feedback-btn.like {
+      color: var(--like-color);
+      border-color: var(--like-color);
     }
     
     .feedback-btn.like:hover,
-    .feedback-btn.like.selected {
+    .feedback-btn.like.active {
       background: var(--like-color);
-      border-color: var(--like-color);
       color: white;
+    }
+    
+    .feedback-btn.dislike {
+      color: var(--dislike-color);
+      border-color: var(--dislike-color);
     }
     
     .feedback-btn.dislike:hover,
-    .feedback-btn.dislike.selected {
+    .feedback-btn.dislike.active {
       background: var(--dislike-color);
-      border-color: var(--dislike-color);
       color: white;
-    }
-    
-    .feedback-btn.selected {
-      animation: pulse-feedback 0.6s ease-out;
-    }
-    
-    @keyframes pulse-feedback {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
     }
     
     .feedback-count {
-      position: absolute;
-      top: -8px;
-      right: -8px;
+      font-weight: bold;
+      min-width: 20px;
+    }
+    
+    .form-section {
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+    
+    .form-section h3 {
+      margin: 0 0 15px 0;
+      color: var(--text-color);
+      font-size: 1rem;
+      text-align: center;
+    }
+    
+    .form-section label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    
+    .form-section input,
+    .form-section textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      margin-top: 4px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-section input:focus,
+    .form-section textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+    }
+    
+    .form-section textarea {
+      height: 80px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    
+    .form-section button {
       background: var(--primary-color);
       color: white;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 0.7em;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+      width: 100%;
+      font-weight: 500;
+    }
+    
+    .form-section button:hover {
+      background: #004499;
+    }
+    
+    .hidden-rating {
+      display: none;
+    }
+    
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.2em;
+      color: #999;
+      cursor: pointer;
+      width: 25px;
+      height: 25px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      opacity: 0;
-      transform: scale(0);
+      border-radius: 50%;
       transition: all 0.3s ease;
     }
     
-    .feedback-system.show-stats .feedback-count {
-      opacity: 1;
-      transform: scale(1);
-    }
-    
-    .feedback-thank-you {
-      position: fixed;
-      bottom: 90px;
-      right: 20px;
-      background: var(--success-color);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 20px;
-      font-size: 0.85em;
-      font-weight: 500;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.5s ease;
-      z-index: 1001;
-      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-    }
-    
-    .feedback-thank-you.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Admin Panel Styles */
-    .admin-panel {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.9);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      min-width: 200px;
-      z-index: 1002;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      transform: translateY(-10px);
-    }
-    
-    .admin-panel.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-    
-    .admin-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.8em;
-      z-index: 1003;
-    }
-    
-    .admin-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .admin-stat {
-      text-align: center;
-      padding: 10px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 5px;
-    }
-    
-    .admin-stat-number {
-      font-size: 1.5em;
-      font-weight: bold;
-      display: block;
-    }
-    
-    .admin-stat-label {
-      font-size: 0.8em;
-      opacity: 0.8;
-    }
-    
-    .admin-actions {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .admin-btn {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.8em;
-      transition: background-color 0.3s;
-    }
-    
-    .admin-btn.reset {
-      background: var(--error-color);
-      color: white;
-    }
-    
-    .admin-btn.export {
-      background: var(--success-color);
-      color: white;
+    .close-btn:hover {
+      background: #f0f0f0;
+      color: #333;
     }
 
     header {
@@ -573,17 +550,11 @@
       .feedback-system {
         bottom: 15px;
         right: 15px;
-        padding: 8px 12px;
+        max-width: 300px;
       }
-      .feedback-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 1em;
-      }
-      .admin-panel {
-        top: 15px;
-        right: 15px;
-        min-width: 180px;
+      .feedback-system.collapsed {
+        max-width: 50px;
+        max-height: 50px;
       }
     }
     @media (max-width: 480px) {
@@ -602,8 +573,8 @@
       .carousel {
         height: 250px;
       }
-      .feedback-system.expanded {
-        max-width: 250px;
+      .feedback-system {
+        max-width: 280px;
       }
     }
   </style>
@@ -619,19 +590,20 @@
     </nav>
   </header>
 
-  <div class="hero" id="home">
+   <div class="hero" id="home">
     <div class="hero-content">
       <h1>Villa Francesca Private Resort</h1>
       <p>For an intimate, unforgettable experience in a breathtaking setting.🏊🌊</p>
     </div>
   </div>
 
-  <div class="about" id="about">
+
+   <div class="about" id="about">
     <div class="container">
       <h2 class="section-title">Welcome to Villa Mejia</h2>
       <p>Escape to paradise! We have an exclusive 22-hour booking available for June 6–7. Don’t miss your chance to relax, recharge, and unwind in luxury. Limited slot – book now! 🏖️✨/p>
       
-      <!-- Featured Carousel -->
+        <!-- Featured Carousel -->
       <div class="carousel">
         <div class="carousel-inner">
           <div class="carousel-item">
@@ -735,249 +707,132 @@
   </div>
 
   <footer>
-    <p>&copy; 2025 Villa Francesca. All Rights Reserved.</p>
+    <p>&copy; 2025 Villa Francesca Private Resort. All Rights Reserved.</p>
     <p>Pansol, Calamba City, Laguna, Philippines</p>
   </footer>
 
-  <!-- Compact Feedback System -->
-  <div class="feedback-system" id="feedbackSystem">
-    <div class="feedback-question">Rate us!</div>
-    <div class="feedback-buttons">
-      <button class="feedback-btn like" title="I like this website">
-        <i class="fas fa-thumbs-up"></i>
-        <span class="feedback-count" id="likesCount">0</span>
+  <!-- Updated Feedback System -->
+  <div class="feedback-system collapsed" id="feedbackSystem">
+    <div class="feedback-toggle">
+      <i class="fas fa-comment"></i>
+    </div>
+    
+    <div class="feedback-content">
+      <button class="close-btn" onclick="toggleFeedback()">
+        <i class="fas fa-times"></i>
       </button>
-      <button class="feedback-btn dislike" title="I don't like this website">
-        <i class="fas fa-thumbs-down"></i>
-        <span class="feedback-count" id="dislikesCount">0</span>
-      </button>
+      
+      <div class="feedback-question">Rate us!</div>
+      <div class="feedback-buttons">
+        <button class="feedback-btn like" title="I like this website" onclick="setRating('like')">
+          <i class="fas fa-thumbs-up"></i>
+          <span class="feedback-count" id="likesCount">0</span>
+        </button>
+        <button class="feedback-btn dislike" title="I don't like this website" onclick="setRating('dislike')">
+          <i class="fas fa-thumbs-down"></i>
+          <span class="feedback-count" id="dislikesCount">0</span>
+        </button>
+      </div>
+
+      <div class="form-section">
+        <h3>Share your feedback</h3>
+        <form action="https://formspree.io/f/mzzgonza" method="POST">
+          <input type="hidden" name="rating" id="ratingValue" class="hidden-rating">
+          
+          <label>
+            Your email:
+            <input type="email" name="email" required>
+          </label>
+          
+          <label>
+            Your message:
+            <textarea name="message" placeholder="Tell us more about your experience..." required oninput="ensureVillaPrefix(this)">VILLA FRANCESCA - </textarea>
+            </label>
+          </label>
+          
+          <button type="submit">Send Feedback</button>
+        </form>
+      </div>
     </div>
   </div>
-
-  <div class="feedback-thank-you" id="thankYouMessage">
-    Thank you for your feedback!
-  </div>
-
-  <!-- Admin Panel -->
-  <button class="admin-toggle" onclick="toggleAdminPanel()">Feedback</button>
-  <div class="admin-panel" id="adminPanel">
-    <h3 style="margin-top: 0;">Feedback Analytics</h3>
-    <div class="admin-stats">
-      <div class="admin-stat">
-        <span class="admin-stat-number" id="adminLikes">0</span>
-        <div class="admin-stat-label">Total Likes</div>
-      </div>
-      <div class="admin-stat">
-        <span class="admin-stat-number" id="adminDislikes">0</span>
-        <div class="admin-stat-label">Total Dislikes</div>
-      </div>
-    </div>
-    <div style="margin-bottom: 10px;">
-      <strong>Rating:</strong> 
-      <span id="adminRating">0%</span> positive
-    </div>
 
   <script>
-    // Feedback Database (using localStorage as simulation)
-    class FeedbackDatabase {
-      constructor() {
-        this.dbKey = 'villa_francesca_feedback';
-        this.init();
-      }
-
-      init() {
-        if (!localStorage.getItem(this.dbKey)) {
-          this.resetData();
-        }
-      }
-
-      getData() {
-        return JSON.parse(localStorage.getItem(this.dbKey));
-      }
-
-      saveData(data) {
-        localStorage.setItem(this.dbKey, JSON.stringify(data));
-      }
-
-      addFeedback(type, userIP = null) {
-        const data = this.getData();
-        const timestamp = new Date().toISOString();
-        const feedback = {
-          type: type,
-          timestamp: timestamp,
-          userIP: userIP || this.generateUserID(),
-          id: Date.now()
-        };
-
-        data.feedback.push(feedback);
-        data.stats[type]++;
-        data.lastUpdated = timestamp;
-
-        this.saveData(data);
-        return data;
-      }
-
-      removeFeedback(type) {
-        const data = this.getData();
-        if (data.stats[type] > 0) {
-          data.stats[type]--;
-          // Remove the most recent feedback of this type
-          for (let i = data.feedback.length - 1; i >= 0; i--) {
-            if (data.feedback[i].type === type) {
-              data.feedback.splice(i, 1);
-              break;
+    
+//dito ako nag tapos    
+ const prefix = "VILLA FRANCESCA - ";
+            
+            function ensureVillaPrefix(textarea) {
+                if (!textarea.value.startsWith(prefix)) {
+                    const userText = textarea.value.replace(/^VILLA FRANCESCA - /g, "");
+                    textarea.value = prefix + userText;
+                    textarea.setSelectionRange(prefix.length, prefix.length);
+                }
             }
-          }
-          data.lastUpdated = new Date().toISOString();
-          this.saveData(data);
-        }
-        return data;
-      }
+            
+            // Set cursor position after VILLA FRANCESCA prefix when clicked
+            document.querySelector('textarea').addEventListener('click', function() {
+                if (this.selectionStart < prefix.length) {
+                    this.setSelectionRange(prefix.length, prefix.length);
+                }
+            });
+            
+            // Prevent deleting the VILLA FRANCESCA prefix and fix backspace issues
+            document.querySelector('textarea').addEventListener('keydown', function(e) {
+                if (this.selectionStart <= prefix.length && (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft')) {
+                    if (e.key === 'Backspace' || e.key === 'Delete') {
+                        e.preventDefault();
+                    }
+                    this.setSelectionRange(prefix.length, prefix.length);
+                }
+            });
+            
+            // Clean up any duplicated VILLA FRANCESCA text on input
+            document.querySelector('textarea').addEventListener('input', function() {
+                if (this.value.indexOf('VILLA FRANCESCA - VILLA FRANCESCA - ') !== -1) {
+                    this.value = this.value.replace(/VILLA FRANCESCA - VILLA FRANCESCA - /g, 'VILLA FRANCESCA - ');
+                    this.setSelectionRange(prefix.length, prefix.length);
+                }
+            });
+    let likesCount = 0;
+    let dislikesCount = 0;
+    let userRating = null;
 
-      getStats() {
-        const data = this.getData();
-        const total = data.stats.likes + data.stats.dislikes;
-        const positivePercentage = total > 0 ? Math.round((data.stats.likes / total) * 100) : 0;
-        
-        return {
-          likes: data.stats.likes,
-          dislikes: data.stats.dislikes,
-          total: total,
-          positivePercentage: positivePercentage,
-          lastUpdated: data.lastUpdated
-        };
-      }
-
-      resetData() {
-        const initialData = {
-          stats: {
-            likes: 0,
-            dislikes: 0
-          },
-          feedback: [],
-          created: new Date().toISOString(),
-          lastUpdated: new Date().toISOString()
-        };
-        this.saveData(initialData);
-        return initialData;
-      }
-
-      exportData() {
-        const data = this.getData();
-        const stats = this.getStats();
-        
-        const exportData = {
-          summary: stats,
-          detailedFeedback: data.feedback,
-          exportDate: new Date().toISOString()
-        };
-
-        return exportData;
-      }
-
-      generateUserID() {
-        return 'user_5' + Math.random().toString(36).substr(2, 9);
-      }
-    }
-
-    // Initialize feedback system
-    const feedbackDB = new FeedbackDatabase();
-    let userFeedback = null;
-    let isAdminPanelOpen = false;
-
-    function updateFeedbackDisplay() {
-      const stats = feedbackDB.getStats();
+    function setRating(rating) {
+      // Remove previous active states
+      document.querySelectorAll('.feedback-btn').forEach(btn => btn.classList.remove('active'));
       
-      // Update compact display
-      document.getElementById('likesCount').textContent = stats.likes;
-      document.getElementById('dislikesCount').textContent = stats.dislikes;
-      
-      // Update admin panel
-      document.getElementById('adminLikes').textContent = stats.likes;
-      document.getElementById('adminDislikes').textContent = stats.dislikes;
-      document.getElementById('adminRating').textContent = stats.positivePercentage + '%';
-      
-      // Show/hide feedback counts based on stats
-      const feedbackSystem = document.getElementById('feedbackSystem');
-      if (stats.total > 0) {
-        feedbackSystem.classList.add('show-stats');
-      } else {
-        feedbackSystem.classList.remove('show-stats');
-      }
-    }
-
-    function giveFeedback(type) {
-      const likeBtn = document.querySelector('.feedback-btn.like');
-      const dislikeBtn = document.querySelector('.feedback-btn.dislike');
-      
-      // If user already gave feedback, remove it first
-      if (userFeedback) {
-        if (userFeedback === type) {
-          // User clicked same button - remove feedback
-          feedbackDB.removeFeedback(type);
-          userFeedback = null;
-          likeBtn.classList.remove('selected');
-          dislikeBtn.classList.remove('selected');
+      // Update counts based on previous and new rating
+      if (userRating === 'like' && rating === 'dislike') {
+        likesCount--;
+        dislikesCount++;
+      } else if (userRating === 'dislike' && rating === 'like') {
+        dislikesCount--;
+        likesCount++;
+      } else if (userRating === null) {
+        if (rating === 'like') {
+          likesCount++;
         } else {
-          // User changed feedback
-          feedbackDB.removeFeedback(userFeedback);
-          feedbackDB.addFeedback(type);
-          userFeedback = type;
-          likeBtn.classList.toggle('selected', type === 'likes');
-          dislikeBtn.classList.toggle('selected', type === 'dislikes');
+          dislikesCount++;
         }
-      } else {
-        // New feedback
-        feedbackDB.addFeedback(type);
-        userFeedback = type;
-        likeBtn.classList.toggle('selected', type === 'likes');
-        dislikeBtn.classList.toggle('selected', type === 'dislikes');
       }
 
-      updateFeedbackDisplay();
-      showThankYouMessage();
-    }
-
-    function showThankYouMessage() {
-      const thankYou = document.getElementById('thankYouMessage');
-      thankYou.classList.add('show');
-      setTimeout(() => {
-        thankYou.classList.remove('show');
-      }, 3000);
-    }
-
-    function toggleAdminPanel() {
-      const panel = document.getElementById('adminPanel');
-      isAdminPanelOpen = !isAdminPanelOpen;
-      panel.classList.toggle('show', isAdminPanelOpen);
-    }
-
-    function resetFeedback() {
-      if (confirm('Are you sure you want to reset all feedback data?')) {
-        feedbackDB.resetData();
-        userFeedback = null;
-        document.querySelector('.feedback-btn.like').classList.remove('selected');
-        document.querySelector('.feedback-btn.dislike').classList.remove('selected');
-        updateFeedbackDisplay();
-        alert('Feedback data has been reset.');
-      }
-    }
-
-    function exportData() {
-      const exportData = feedbackDB.exportData();
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], {type: 'application/json'});
-      const url = URL.createObjectURL(dataBlob);
+      // Set new rating
+      userRating = rating;
       
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `laguna_resort_feedback_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Update display
+      document.getElementById('likesCount').textContent = likesCount;
+      document.getElementById('dislikesCount').textContent = dislikesCount;
       
-      alert('Feedback data exported successfully!');
+      // Add active state to selected button
+      document.querySelector(`.feedback-btn.${rating}`).classList.add('active');
+      
+      // Set hidden form field
+      document.getElementById('ratingValue').value = rating;
+    }
+
+    function toggleFeedback() {
+      const feedbackSystem = document.getElementById('feedbackSystem');
+      feedbackSystem.classList.toggle('collapsed');
     }
 
     // Carousel functionality
@@ -1036,292 +891,224 @@
       `;
       
       // Add modal styles
-      const modalStyles = `
-        .image-modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 9999;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .modal-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.9);
-          backdrop-filter: blur(5px);
-        }
-        .modal-content {
-          position: relative;
-          max-width: 90%;
-          max-height: 90%;
-          background: white;
-          border-radius: 10px;
-          overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-        }
-        .modal-content img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          display: block;
-        }
-        .modal-close {
-          position: absolute;
-          top: 15px;
-          right: 15px;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          border: none;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          cursor: pointer;
-          font-size: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background-color 0.3s;
-        }
-        .modal-close:hover {
-          background: rgba(0, 0, 0, 0.9);
-        }
-      `;
-      
-      const styleSheet = document.createElement('style');
-      styleSheet.textContent = modalStyles;
-      document.head.appendChild(styleSheet);
-      
-      document.body.appendChild(modal);
-      document.body.style.overflow = 'hidden';
-      
-      // Add animation
-      setTimeout(() => {
-        modal.style.opacity = '1';
-      }, 10);
-    }
+     const style = document.createElement('style');
+     style.textContent = `
+       .image-modal {
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100%;
+         height: 100%;
+         background-color: rgba(0, 0, 0, 0.9);
+         z-index: 2000;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         opacity: 0;
+         animation: fadeIn 0.3s ease forwards;
+       }
+       
+       .modal-overlay {
+         width: 100%;
+         height: 100%;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         cursor: pointer;
+       }
+       
+       .modal-content {
+         position: relative;
+         max-width: 90%;
+         max-height: 90%;
+         cursor: default;
+         transform: scale(0.8);
+         animation: scaleIn 0.3s ease forwards;
+       }
+       
+       .modal-content img {
+         width: 100%;
+         height: 100%;
+         object-fit: contain;
+         border-radius: 10px;
+         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+       }
+       
+       .modal-close {
+         position: absolute;
+         top: -40px;
+         right: -40px;
+         background: rgba(255, 255, 255, 0.2);
+         border: none;
+         color: white;
+         font-size: 24px;
+         width: 40px;
+         height: 40px;
+         border-radius: 50%;
+         cursor: pointer;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         transition: all 0.3s ease;
+         backdrop-filter: blur(10px);
+       }
+       
+       .modal-close:hover {
+         background: rgba(255, 255, 255, 0.3);
+         transform: scale(1.1);
+       }
+       
+       @keyframes fadeIn {
+         to { opacity: 1; }
+       }
+       
+       @keyframes scaleIn {
+         to { transform: scale(1); }
+       }
+       
+       @media (max-width: 768px) {
+         .modal-close {
+           top: -30px;
+           right: -30px;
+           width: 35px;
+           height: 35px;
+           font-size: 20px;
+         }
+       }
+     `;
+     
+     document.head.appendChild(style);
+     document.body.appendChild(modal);
+     
+     // Prevent body scroll
+     document.body.style.overflow = 'hidden';
+   }
 
-    function closeImageModal() {
-      const modal = document.querySelector('.image-modal');
-      if (modal) {
-        modal.style.opacity = '0';
-        setTimeout(() => {
-          document.body.removeChild(modal);
-          document.body.style.overflow = '';
-        }, 300);
-      }
-    }
+   function closeImageModal() {
+     const modal = document.querySelector('.image-modal');
+     if (modal) {
+       modal.style.opacity = '0';
+       setTimeout(() => {
+         modal.remove();
+         document.body.style.overflow = 'auto';
+       }, 300);
+     }
+   }
 
-    // Smooth scrolling for navigation links
-    function smoothScroll(targetId) {
-      const target = document.getElementById(targetId);
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    }
+   // Event listeners
+   document.addEventListener('DOMContentLoaded', function() {
+     // Carousel controls
+     document.querySelector('.carousel-next').addEventListener('click', nextSlide);
+     document.querySelector('.carousel-prev').addEventListener('click', prevSlide);
+     
+     // Carousel indicators
+     indicators.forEach((indicator, index) => {
+       indicator.addEventListener('click', () => showSlide(index));
+     });
+     
+     // Gallery image clicks
+     document.querySelectorAll('.gallery img').forEach(img => {
+       img.addEventListener('click', function() {
+         openImageModal(this.src, this.alt);
+       });
+     });
+     
+     // Carousel hover effects
+     const carousel = document.querySelector('.carousel');
+     carousel.addEventListener('mouseenter', stopCarousel);
+     carousel.addEventListener('mouseleave', startCarousel);
+     
+     // Start carousel
+     startCarousel();
+     
+     // Smooth scrolling for navigation
+     document.querySelectorAll('nav a').forEach(link => {
+       link.addEventListener('click', function(e) {
+         e.preventDefault();
+         const targetId = this.getAttribute('href').substring(1);
+         const targetElement = document.getElementById(targetId);
+         
+         if (targetElement) {
+           const headerOffset = 70;
+           const elementPosition = targetElement.offsetTop;
+           const offsetPosition = elementPosition - headerOffset;
+           
+           window.scrollTo({
+             top: offsetPosition,
+             behavior: 'smooth'
+           });
+         }
+       });
+     });
+     
+     // Form submission handling
+     document.querySelector('form').addEventListener('submit', function(e) {
+       const messageTextarea = document.querySelector('textarea[name="message"]');
+       if (messageTextarea.value.trim() === 'VILLA FRANCESCA - ') {
+         e.preventDefault();
+         alert('Please enter your feedback message.');
+         return;
+       }
+       
+       // Show success message after form submission
+       setTimeout(() => {
+         alert('Thank you for your feedback! We appreciate your input.');
+         this.reset();
+         document.querySelector('textarea[name="message"]').value = 'VILLA FRANCESCA - ';
+         document.getElementById('ratingValue').value = '';
+         document.querySelectorAll('.feedback-btn').forEach(btn => btn.classList.remove('active'));
+         toggleFeedback();
+       }, 100);
+     });
+     
+     // Keyboard navigation for modal
+     document.addEventListener('keydown', function(e) {
+       if (e.key === 'Escape') {
+         closeImageModal();
+       }
+     });
+     
+     // Initialize feedback system as collapsed
+     const feedbackSystem = document.getElementById('feedbackSystem');
+     feedbackSystem.addEventListener('click', function(e) {
+       if (this.classList.contains('collapsed') && !e.target.closest('.close-btn')) {
+         toggleFeedback();
+       }
+     });
+   });
 
-    // Intersection Observer for animations
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
+   // Parallax effect for hero section
+   window.addEventListener('scroll', function() {
+     const scrolled = window.pageYOffset;
+     const hero = document.querySelector('.hero');
+     const rate = scrolled * -0.5;
+     
+     if (hero) {
+       hero.style.transform = `translateY(${rate}px)`;
+     }
+   });
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }
-      });
-    }, observerOptions);
+   // Add loading animation for images
+   function addImageLoadingEffect() {
+     const images = document.querySelectorAll('img');
+     images.forEach(img => {
+       img.style.opacity = '0';
+       img.style.transition = 'opacity 0.5s ease';
+       
+       img.addEventListener('load', function() {
+         this.style.opacity = '1';
+       });
+       
+       // If image is already loaded
+       if (img.complete) {
+         img.style.opacity = '1';
+       }
+     });
+   }
 
-    // Initialize everything when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      // Update initial feedback display
-      updateFeedbackDisplay();
-      
-      // Expand feedback system on hover
-      const feedbackSystem = document.getElementById('feedbackSystem');
-      feedbackSystem.addEventListener('mouseenter', () => {
-        feedbackSystem.classList.add('expanded');
-      });
-      
-      feedbackSystem.addEventListener('mouseleave', () => {
-        feedbackSystem.classList.remove('expanded');
-      });
-      
-      // Add feedback button event listeners
-      document.querySelector('.feedback-btn.like').addEventListener('click', () => {
-        giveFeedback('likes');
-      });
-      
-      document.querySelector('.feedback-btn.dislike').addEventListener('click', () => {
-        giveFeedback('dislikes');
-      });
-      
-      // Add carousel event listeners
-      document.querySelector('.carousel-prev').addEventListener('click', prevSlide);
-      document.querySelector('.carousel-next').addEventListener('click', nextSlide);
-      
-      // Add indicator click events
-      indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => showSlide(index));
-      });
-      
-      // Start carousel auto-advance
-      const carousel = document.querySelector('.carousel');
-      carousel.addEventListener('mouseenter', stopCarousel);
-      carousel.addEventListener('mouseleave', startCarousel);
-      startCarousel();
-      
-      // Add gallery image click events
-      const galleryImages = document.querySelectorAll('.gallery img');
-      galleryImages.forEach(img => {
-        img.addEventListener('click', () => {
-          openImageModal(img.src, img.alt);
-        });
-      });
-      
-      // Add navigation smooth scrolling
-      const navLinks = document.querySelectorAll('nav a[href^="#"]');
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const targetId = link.getAttribute('href').substring(1);
-          smoothScroll(targetId);
-        });
-      });
-      
-      // Observe elements for animations
-      const animatedElements = document.querySelectorAll('.facility-item, .section-title, .gallery img');
-      animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-      });
-      
-      // Add keyboard support
-      document.addEventListener('keydown', (e) => {
-        if (document.querySelector('.image-modal')) {
-          if (e.key === 'Escape') {
-            closeImageModal();
-          }
-        }
-        
-        if (e.key === 'ArrowLeft') {
-          prevSlide();
-        } else if (e.key === 'ArrowRight') {
-          nextSlide();
-        }
-      });
-      
-      // Add scroll-based animations
-      window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const parallax = document.querySelector('.hero');
-        const speed = scrolled * 0.5;
-        parallax.style.transform = `translateY(${speed}px)`;
-      });
-      
-      // Preload images for better performance
-      const imageUrls = [
-        '/picture/5_resort/1.jpg',
-        '/picture/5_resort/2.jpg',
-        '/picture/5_resort/3.jpg',
-        '/picture/5_resort/4.jpg',
-        '/picture/5_resort/5.jpg'
-      ];
-      
-      imageUrls.forEach(url => {
-        const img = new Image();
-        img.src = url;
-      });
-      
-      // Add loading animation
-      const loadingScreen = document.createElement('div');
-      loadingScreen.innerHTML = `
-        <div style="
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #0066cc, #004499);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10000;
-          color: white;
-          font-size: 1.2em;
-          opacity: 1;
-          transition: opacity 0.5s ease;
-        ">
-          <div style="text-align: center;">
-            <i class="fas fa-water" style="font-size: 3em; margin-bottom: 20px; animation: pulse 2s infinite;"></i>
-            <div>Loading Laguna Hot Spring Resort...</div>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(loadingScreen);
-      
-      // Remove loading screen after content loads
-      window.addEventListener('load', () => {
-        setTimeout(() => {
-          loadingScreen.style.opacity = '0';
-          setTimeout(() => {
-            if (document.body.contains(loadingScreen)) {
-              document.body.removeChild(loadingScreen);
-            }
-          }, 500);
-        }, 1000);
-      });
-    });
-
-    // Error handling for missing images
-    document.addEventListener('error', (e) => {
-      if (e.target.tagName === 'IMG') {
-        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNHB4IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEF2YWlsYWJsZTwvdGV4dD48L3N2Zz4=';
-        e.target.alt = 'Image not available';
-      }
-    }, true);
-
-    // Add CSS animations
-    const additionalStyles = `
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-      }
-      
-      @keyframes slideInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      .fade-in {
-        animation: slideInUp 0.6s ease-out;
-      }
-    `;
-
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = additionalStyles;
-    document.head.appendChild(styleSheet);
-</script>
+   // Initialize image loading effects
+   addImageLoadingEffect();
+ </script>
 </body>
 </html>
