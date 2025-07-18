@@ -996,342 +996,130 @@
       document.addEventListener('keydown', handleModalKeydown);
     }
 
-    function closeImageModal() {
-      const modal = document.querySelector('.image-modal');
-      if (modal) {
-        modal.style.animation = 'modalFadeOut 0.3s ease';
-        setTimeout(() => {
-          modal.remove();
-          document.body.style.overflow = 'auto';
-          document.removeEventListener('keydown', handleModalKeydown);
-        }, 300);
-      }
-    }
+   function closeImageModal() {
+     const modal = document.querySelector('.image-modal');
+     if (modal) {
+       modal.style.opacity = '0';
+       setTimeout(() => {
+         modal.remove();
+         document.body.style.overflow = 'auto';
+       }, 300);
+     }
+   }
 
-    function handleModalKeydown(e) {
-      if (e.key === 'Escape') {
-        closeImageModal();
-      }
-    }
+   // Event listeners
+   document.addEventListener('DOMContentLoaded', function() {
+     // Carousel controls
+     document.querySelector('.carousel-next').addEventListener('click', nextSlide);
+     document.querySelector('.carousel-prev').addEventListener('click', prevSlide);
+     
+     // Carousel indicators
+     indicators.forEach((indicator, index) => {
+       indicator.addEventListener('click', () => showSlide(index));
+     });
+     
+     // Gallery image clicks
+     document.querySelectorAll('.gallery img').forEach(img => {
+       img.addEventListener('click', function() {
+         openImageModal(this.src, this.alt);
+       });
+     });
+     
+     // Carousel hover effects
+     const carousel = document.querySelector('.carousel');
+     carousel.addEventListener('mouseenter', stopCarousel);
+     carousel.addEventListener('mouseleave', startCarousel);
+     
+     // Start carousel
+     startCarousel();
+     
+     // Smooth scrolling for navigation
+     document.querySelectorAll('nav a').forEach(link => {
+       link.addEventListener('click', function(e) {
+         e.preventDefault();
+         const targetId = this.getAttribute('href').substring(1);
+         const targetElement = document.getElementById(targetId);
+         
+         if (targetElement) {
+           const headerOffset = 70;
+           const elementPosition = targetElement.offsetTop;
+           const offsetPosition = elementPosition - headerOffset;
+           
+           window.scrollTo({
+             top: offsetPosition,
+             behavior: 'smooth'
+           });
+         }
+       });
+     });
+     
+     // Form submission handling
+     document.querySelector('form').addEventListener('submit', function(e) {
+       const messageTextarea = document.querySelector('textarea[name="message"]');
+       if (messageTextarea.value.trim() === 'VILLA FRANCESCA - ') {
+         e.preventDefault();
+         alert('Please enter your feedback message.');
+         return;
+       }
+       
+       // Show success message after form submission
+       setTimeout(() => {
+         alert('Thank you for your feedback! We appreciate your input.');
+         this.reset();
+         document.querySelector('textarea[name="message"]').value = 'VILLA FRANCESCA - ';
+         document.getElementById('ratingValue').value = '';
+         document.querySelectorAll('.feedback-btn').forEach(btn => btn.classList.remove('active'));
+         toggleFeedback();
+       }, 100);
+     });
+     
+     // Keyboard navigation for modal
+     document.addEventListener('keydown', function(e) {
+       if (e.key === 'Escape') {
+         closeImageModal();
+       }
+     });
+     
+     // Initialize feedback system as collapsed
+     const feedbackSystem = document.getElementById('feedbackSystem');
+     feedbackSystem.addEventListener('click', function(e) {
+       if (this.classList.contains('collapsed') && !e.target.closest('.close-btn')) {
+         toggleFeedback();
+       }
+     });
+   });
 
-    // Initialize event listeners when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      // Carousel functionality
-      let currentSlide = 0;
-      const slides = document.querySelectorAll('.carousel-item');
-      const indicators = document.querySelectorAll('.carousel-indicator');
-      const totalSlides = slides.length;
+   // Parallax effect for hero section
+   window.addEventListener('scroll', function() {
+     const scrolled = window.pageYOffset;
+     const hero = document.querySelector('.hero');
+     const rate = scrolled * -0.5;
+     
+     if (hero) {
+       hero.style.transform = `translateY(${rate}px)`;
+     }
+   });
 
-      function showSlide(index) {
-        const carousel = document.querySelector('.carousel-inner');
-        const offset = -index * 100;
-        carousel.style.transform = `translateX(${offset}%)`;
-        
-        // Update indicators
-        indicators.forEach((indicator, i) => {
-          indicator.classList.toggle('active', i === index);
-        });
-        
-        currentSlide = index;
-      }
+   // Add loading animation for images
+   function addImageLoadingEffect() {
+     const images = document.querySelectorAll('img');
+     images.forEach(img => {
+       img.style.opacity = '0';
+       img.style.transition = 'opacity 0.5s ease';
+       
+       img.addEventListener('load', function() {
+         this.style.opacity = '1';
+       });
+       
+       // If image is already loaded
+       if (img.complete) {
+         img.style.opacity = '1';
+       }
+     });
+   }
 
-      function nextSlide() {
-        const next = (currentSlide + 1) % totalSlides;
-        showSlide(next);
-      }
-
-      function prevSlide() {
-        const prev = (currentSlide - 1 + totalSlides) % totalSlides;
-        showSlide(prev);
-      }
-
-      // Auto-advance carousel
-      let carouselInterval;
-
-      function startCarousel() {
-        carouselInterval = setInterval(nextSlide, 5000);
-      }
-
-      function stopCarousel() {
-        clearInterval(carouselInterval);
-      }
-
-      // Carousel controls
-      const nextBtn = document.querySelector('.carousel-next');
-      const prevBtn = document.querySelector('.carousel-prev');
-      
-      if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-          stopCarousel();
-          nextSlide();
-          startCarousel();
-        });
-      }
-      
-      if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-          stopCarousel();
-          prevSlide();
-          startCarousel();
-        });
-      }
-
-      // Indicator clicks
-      indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => {
-          stopCarousel();
-          showSlide(index);
-          startCarousel();
-        });
-      });
-
-      // Pause carousel on hover
-      const carousel = document.querySelector('.carousel');
-      if (carousel) {
-        carousel.addEventListener('mouseenter', stopCarousel);
-        carousel.addEventListener('mouseleave', startCarousel);
-      }
-
-      // Start carousel
-      if (totalSlides > 0) {
-        startCarousel();
-      }
-
-      // Gallery image clicks
-      const galleryImages = document.querySelectorAll('.gallery img');
-      galleryImages.forEach(img => {
-        img.addEventListener('click', () => {
-          openImageModal(img.src, img.alt);
-        });
-      });
-
-      // Facility image clicks
-      const facilityImages = document.querySelectorAll('.facility-item img');
-      facilityImages.forEach(img => {
-        img.addEventListener('click', () => {
-          openImageModal(img.src, img.alt);
-        });
-      });
-
-      // Carousel image clicks
-      const carouselImages = document.querySelectorAll('.carousel-item img');
-      carouselImages.forEach(img => {
-        img.addEventListener('click', () => {
-          openImageModal(img.src, img.alt);
-        });
-      });
-
-      // Smooth scrolling for navigation links
-      const navLinks = document.querySelectorAll('nav a[href^="#"]');
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const targetId = link.getAttribute('href').substring(1);
-          const targetElement = document.getElementById(targetId);
-          
-          if (targetElement) {
-            targetElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        });
-      });
-
-      // Intersection Observer for animations
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
-          }
-        });
-      }, observerOptions);
-
-      // Observe elements for animation
-      const animateElements = document.querySelectorAll('.facility-item, .section-title, .gallery img');
-      animateElements.forEach(el => observer.observe(el));
-
-      // Add CSS animation for fade in up
-      const animationStyle = document.createElement('style');
-      animationStyle.textContent = `
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes modalFadeOut {
-          from {
-            opacity: 1;
-            transform: scale(1);
-          }
-          to {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-        }
-      `;
-      document.head.appendChild(animationStyle);
-    });
-
-    // Feedback system functionality
-    let likesCount = 0;
-    let dislikesCount = 0;
-    let userRating = null;
-
-    function setRating(rating) {
-      // Remove previous active states
-      document.querySelectorAll('.feedback-btn').forEach(btn => btn.classList.remove('active'));
-      
-      // Update counts based on previous and new rating
-      if (userRating === 'like' && rating === 'dislike') {
-        likesCount--;
-        dislikesCount++;
-      } else if (userRating === 'dislike' && rating === 'like') {
-        dislikesCount--;
-        likesCount++;
-      } else if (userRating === null) {
-        if (rating === 'like') {
-          likesCount++;
-        } else {
-          dislikesCount++;
-        }
-      }
-
-      // Set new rating
-      userRating = rating;
-      
-      // Update display
-      document.getElementById('likesCount').textContent = likesCount;
-      document.getElementById('dislikesCount').textContent = dislikesCount;
-      
-      // Add active state to selected button
-      document.querySelector(`.feedback-btn.${rating}`).classList.add('active');
-      
-      // Set hidden form field
-      document.getElementById('ratingValue').value = rating;
-    }
-
-    function toggleFeedback() {
-      const feedbackSystem = document.getElementById('feedbackSystem');
-      feedbackSystem.classList.toggle('collapsed');
-    }
-
-    // Textarea prefix functionality
-    const prefix = "ELYSIAN - ";
-    
-    function ensureElysianPrefix(textarea) {
-      if (!textarea.value.startsWith(prefix)) {
-        const userText = textarea.value.replace(/^ELYSIAN - /g, "");
-        textarea.value = prefix + userText;
-        textarea.setSelectionRange(prefix.length, prefix.length);
-      }
-    }
-
-    // Initialize textarea functionality when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      const textarea = document.querySelector('textarea');
-      if (textarea) {
-        // Set cursor position after ELYSIAN prefix when clicked
-        textarea.addEventListener('click', function() {
-          if (this.selectionStart < prefix.length) {
-            this.setSelectionRange(prefix.length, prefix.length);
-          }
-        });
-        
-        // Prevent deleting the ELYSIAN prefix and fix backspace issues
-        textarea.addEventListener('keydown', function(e) {
-          if (this.selectionStart <= prefix.length && (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft')) {
-            if (e.key === 'Backspace' || e.key === 'Delete') {
-              e.preventDefault();
-            }
-            this.setSelectionRange(prefix.length, prefix.length);
-          }
-        });
-        
-        // Clean up any duplicated ELYSIAN text on input
-        textarea.addEventListener('input', function() {
-          if (this.value.indexOf('ELYSIAN - ELYSIAN - ') !== -1) {
-            this.value = this.value.replace(/ELYSIAN - ELYSIAN - /g, 'ELYSIAN - ');
-            this.setSelectionRange(prefix.length, prefix.length);
-          }
-        });
-      }
-    });
-
-    // Lazy loading for images
-    document.addEventListener('DOMContentLoaded', function() {
-      const images = document.querySelectorAll('img[data-src]');
-      
-      const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            img.src = img.dataset.src;
-            img.classList.remove('lazy');
-            imageObserver.unobserve(img);
-          }
-        });
-      });
-
-      images.forEach(img => imageObserver.observe(img));
-    });
-
-    // Parallax effect for hero section
-    window.addEventListener('scroll', function() {
-      const scrolled = window.pageYOffset;
-      const hero = document.querySelector('.hero');
-      if (hero) {
-        hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-      }
-    });
-
-    // Enhanced form validation
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.querySelector('form');
-      if (form) {
-        form.addEventListener('submit', function(e) {
-          const email = form.querySelector('input[type="email"]');
-          const message = form.querySelector('textarea');
-          
-          if (!email.value.includes('@')) {
-            e.preventDefault();
-            alert('Please enter a valid email address.');
-            return;
-          }
-          
-          if (message.value.length < 10) {
-            e.preventDefault();
-            alert('Please enter a message with at least 10 characters.');
-            return;
-          }
-          
-          // Show success message
-          const button = form.querySelector('button[type="submit"]');
-          const originalText = button.textContent;
-          button.textContent = 'Sending...';
-          button.disabled = true;
-          
-          setTimeout(() => {
-            button.textContent = 'Sent!';
-            setTimeout(() => {
-              button.textContent = originalText;
-              button.disabled = false;
-            }, 2000);
-          }, 1000);
-        });
-      }
-    });
+   // Initialize image loading effects
+   addImageLoadingEffect();
   </script>
 </body>
 </html>
