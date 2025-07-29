@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do you love me?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffeef3, #ffd6e8);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .characters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .character {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .bear {
+            background: #d4a574;
+            border: 3px solid #b8935f;
+        }
+
+        .panda {
+            background: white;
+            border: 3px solid #333;
+        }
+
+        .bear::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            width: 20px;
+            height: 20px;
+            background: #d4a574;
+            border-radius: 50%;
+            border: 2px solid #b8935f;
+        }
+
+        .bear::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            background: #d4a574;
+            border-radius: 50%;
+            border: 2px solid #b8935f;
+        }
+
+        .panda::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 15px;
+            width: 25px;
+            height: 25px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .panda::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            right: 15px;
+            width: 25px;
+            height: 25px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .face {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+        }
+
+        .speech-bubble {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            position: relative;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 14px;
+            color: #666;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            position: relative;
+            height: 80px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .yes-btn {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+        }
+
+        .yes-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .no-btn {
+            background: linear-gradient(135deg, #e0e0e0, #f0f0f0);
+            color: #666;
+            position: absolute;
+            transition: all 0.2s ease;
+        }
+
+        .no-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .heart {
+            position: absolute;
+            color: #ff6b9d;
+            font-size: 20px;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes float {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            z-index: 1001;
+            display: none;
+        }
+
+        .success-message h2 {
+            color: #ff6b9d;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .success-message p {
+            color: #666;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="characters">
+            <div class="character bear">
+                <div class="face">😊</div>
+            </div>
+            <div class="speech-bubble">Hey!</div>
+            <div class="character panda">
+                <div class="face">😳</div>
+            </div>
+        </div>
+
+        <h1>Do you love me?</h1>
+
+        <div class="buttons">
+            <button class="btn yes-btn" onclick="showLove()">Yes</button>
+            <button class="btn no-btn" id="noBtn" onmouseover="moveButton()" onclick="moveButton()">No</button>
+        </div>
+    </div>
+
+    <div class="hearts" id="hearts"></div>
+    
+    <div class="success-message" id="successMessage">
+        <h2>Yay! 💕</h2>
+        <p>I love you too! 🥰</p>
+    </div>
+
+    <script>
+        let noButton = document.getElementById('noBtn');
+        let attempts = 0;
+
+        function moveButton() {
+            const container = document.querySelector('.container');
+            const containerRect = container.getBoundingClientRect();
+            
+            // Generate random position within the container
+            const maxX = containerRect.width - 100; // Account for button width
+            const maxY = containerRect.height - 50; // Account for button height
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            
+            noButton.style.left = randomX + 'px';
+            noButton.style.top = randomY + 'px';
+            
+            attempts++;
+            
+            // Change button text after several attempts
+            if (attempts > 3) {
+                noButton.textContent = "Stop it! 😤";
+            }
+            if (attempts > 6) {
+                noButton.textContent = "Please? 🥺";
+            }
+            if (attempts > 10) {
+                noButton.textContent = "Fine... 😔";
+                noButton.style.opacity = '0.5';
+            }
+        }
+
+        function showLove() {
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Create floating hearts
+            createHearts();
+            
+            // Hide the success message after 3 seconds
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+        }
+
+        function createHearts() {
+            const heartsContainer = document.getElementById('hearts');
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.innerHTML = '💖';
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.animationDelay = Math.random() * 2 + 's';
+                    heartsContainer.appendChild(heart);
+                    
+                    // Remove heart after animation
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+
+        // Initial random position for no button
+        window.addEventListener('load', () => {
+            setTimeout(moveButton, 100);
+        });
+    </script>
+</body>
+</html>
